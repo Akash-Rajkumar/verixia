@@ -18,7 +18,6 @@ contract SpendingCharter is Ownable, ReentrancyGuard {
     error OnlyAgent();
     error InvalidAgent();
     error InvalidCounterpartyStatus();
-    error HumanApprovalSemanticsUnspecified();
 
     event PaymentExecuted(
         bytes32 indexed receiptId,
@@ -42,6 +41,7 @@ contract SpendingCharter is Ownable, ReentrancyGuard {
     );
 
     event CounterpartyStatusSet(address indexed counterparty, uint8 status);
+    event PaymentApproved(address indexed to, uint256 amount);
 
     struct Rules {
         uint256 maxPerTx;
@@ -60,6 +60,7 @@ contract SpendingCharter is Ownable, ReentrancyGuard {
     SpendingWindow private spendingWindow;
     mapping(address counterparty => uint8 status) private counterpartyStatus;
     mapping(address counterparty => bool configured) private counterpartyConfigured;
+    mapping(bytes32 => bool) private approvals;
 
     modifier onlyAgent() {
         if (msg.sender != agent) revert OnlyAgent();
@@ -98,6 +99,15 @@ contract SpendingCharter is Ownable, ReentrancyGuard {
     function setAgent(address newAgent) external onlyOwner {
         if (newAgent == address(0)) revert InvalidAgent();
         agent = newAgent;
+    }
+
+    function approvePayment(address to, uint256 amount) external onlyOwner {
+        approvals[_approvalKey(to, amount)] = true;
+        emit PaymentApproved(to, amount);
+    }
+
+    function isApproved(address to, uint256 amount) external view returns (bool) {
+        return approvals[_approvalKey(to, amount)];
     }
 
     function fund() external payable {}
@@ -188,6 +198,10 @@ contract SpendingCharter is Ownable, ReentrancyGuard {
         (bool sent,) = to.call{value: amount}("");
         require(sent, "SpendingCharter: transfer failed");
 
+        if (amount > rules.humanApprovalThreshold) {
+            delete approvals[_approvalKey(to, amount)];
+        }
+
         emit PaymentExecuted(receiptId, to, amount, spendingWindow.spentInWindow);
         return (true, OK);
     }
@@ -209,14 +223,19 @@ contract SpendingCharter is Ownable, ReentrancyGuard {
             return (false, EXCEEDS_DAILY_CAP);
         }
 
-        _humanApprovalDecisionIsUnspecified();
+        if (
+            amount > rules.humanApprovalThreshold
+                && !approvals[_approvalKey(to, amount)]
+        ) {
+            return (false, REQUIRES_HUMAN_APPROVAL);
+        }
 
         if (amount > address(this).balance) return (false, INSUFFICIENT_BALANCE);
         return (true, OK);
     }
 
-    function _humanApprovalDecisionIsUnspecified() internal pure {
-        revert HumanApprovalSemanticsUnspecified();
+    function _approvalKey(address to, uint256 amount) private pure returns (bytes32) {
+        return keccak256(abi.encode(to, amount));
     }
 
     function _effectiveWindow() internal view returns (uint256 effectiveStart, uint256 effectiveSpent) {
