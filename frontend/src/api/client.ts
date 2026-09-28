@@ -93,7 +93,17 @@ export class ApiClient {
 
   // AGENTS
   async getAgents(): Promise<Agent[]> {
-    return this.request<Agent[]>("/agents")
+    try {
+      return await this.request<Agent[]>("/agents")
+    } catch (err) {
+      if (
+        err instanceof ApiError &&
+        (err.code === "NOT_IMPLEMENTED" || err.message.includes("not implemented"))
+      ) {
+        return []
+      }
+      throw err
+    }
   }
 
   async getAgent(id: string): Promise<Agent> {
@@ -128,9 +138,19 @@ export class ApiClient {
   async getCharterCounterparties(): Promise<
     { address: string; name: string; status: "allowed" | "denied" }[]
   > {
-    return this.request<
-      { address: string; name: string; status: "allowed" | "denied" }[]
-    >("/charter/counterparties")
+    try {
+      return await this.request<
+        { address: string; name: string; status: "allowed" | "denied" }[]
+      >("/charter/counterparties")
+    } catch (err) {
+      if (
+        err instanceof ApiError &&
+        (err.code === "NOT_IMPLEMENTED" || err.message.includes("not implemented"))
+      ) {
+        return []
+      }
+      throw err
+    }
   }
 
   // CONVERSATIONS
@@ -145,7 +165,17 @@ export class ApiClient {
   }
 
   async getConversationMessages(id: string): Promise<Message[]> {
-    return this.request<Message[]>(`/conversations/${id}/messages`)
+    try {
+      return await this.request<Message[]>(`/conversations/${id}/messages`)
+    } catch (err) {
+      if (
+        err instanceof ApiError &&
+        (err.code === "NOT_IMPLEMENTED" || err.message.includes("not implemented"))
+      ) {
+        return []
+      }
+      throw err
+    }
   }
 
   // GOOD AGENT
