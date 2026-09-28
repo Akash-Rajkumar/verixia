@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --verixia-black: #000000;
+    --verixia-black-soft: #050505;
+    --verixia-black-surface: #0a0a0a;
+    --verixia-black-panel: #101010;
+
+    --verixia-white: #ffffff;
+    --verixia-white-soft: #f5f5f5;
+    --verixia-white-muted: #cfcfcf;
+    --verixia-white-dim: #8e8e8e;
+
+    --verixia-yellow: #dfff00;
+
+    --verixia-border: rgba(255, 255, 255, 0.12);
+    --verixia-border-strong: rgba(255, 255, 255, 0.25);
+    --verixia-glow: rgba(223, 255, 0, 0.15);
+  }
+
+  body {
+    background-color: #000000;
+    background-image: 
+      radial-gradient(at 20% 20%, rgba(223, 255, 0, 0.03) 0px, transparent 50%),
+      radial-gradient(at 80% 30%, rgba(255, 255, 255, 0.02) 0px, transparent 40%),
+      radial-gradient(at 50% 80%, rgba(223, 255, 0, 0.025) 0px, transparent 50%),
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+    background-attachment: fixed;
+    color: #ffffff;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    overflow-x: hidden;
+    letter-spacing: -0.011em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  }
+}
+
+/* Verixia Glass & Surface Utilities */
+.glass-verixia-base {
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.glass-verixia-panel {
+  background: rgba(16, 16, 16, 0.90);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.glass-verixia-yellow {
+  background: rgba(18, 18, 18, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(223, 255, 0, 0.4);
+  box-shadow: 0 0 25px rgba(223, 255, 0, 0.08);
+}
+
+/* Neon Yellow Accent Helpers */
+.text-yellow-neon {
+  color: #dfff00;
+}
+
+.border-yellow-neon {
+  border-color: #dfff00;
+}
+
+.bg-yellow-neon {
+  background-color: #dfff00;
+}
+
+.glow-yellow-neon {
+  box-shadow: 0 0 24px rgba(223, 255, 0, 0.16);
+}
+
+/* Custom Minimal Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 2.5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #dfff00;
+}
