@@ -84,8 +84,8 @@ describe("SpendingCharter", function () {
     await charter.connect(owner).setCounterpartyStatus(recipient.address, 0);
     expect(await charter.getCounterpartyStatus(recipient.address)).to.equal(0);
 
-    await expect(charter.checkPayment(recipient.address, MAX_PER_TX))
-      .to.be.revertedWithCustomError(charter, "HumanApprovalSemanticsUnspecified");
+    expect(await charter.checkPayment.staticCall(recipient.address, MAX_PER_TX))
+      .to.deep.equal([false, constants.reasonCodes.REQUIRES_HUMAN_APPROVAL]);
   });
 
   it("returns COUNTERPARTY_DENIED before any later applicable rule", async function () {
@@ -112,9 +112,9 @@ describe("SpendingCharter", function () {
       .to.deep.equal([false, constants.reasonCodes.EXCEEDS_MAX_PER_TX]);
   });
 
-  it("does not fail the max-per-transaction boundary before the unresolved decision", async function () {
-    await expect(charter.checkPayment(recipient.address, MAX_PER_TX))
-      .to.be.revertedWithCustomError(charter, "HumanApprovalSemanticsUnspecified");
+  it("returns REQUIRES_HUMAN_APPROVAL after the max-per-transaction check", async function () {
+    expect(await charter.checkPayment.staticCall(recipient.address, MAX_PER_TX))
+      .to.deep.equal([false, constants.reasonCodes.REQUIRES_HUMAN_APPROVAL]);
   });
 
   it("returns EXCEEDS_DAILY_CAP when the amount exceeds the remaining cap", async function () {
@@ -124,10 +124,10 @@ describe("SpendingCharter", function () {
       .to.deep.equal([false, constants.reasonCodes.EXCEEDS_DAILY_CAP]);
   });
 
-  it("does not fail the daily-cap boundary before the unresolved decision", async function () {
+  it("returns REQUIRES_HUMAN_APPROVAL after the daily-cap check", async function () {
     await setRules({ maxPerTx: 200n });
-    await expect(charter.checkPayment(recipient.address, DAILY_CAP))
-      .to.be.revertedWithCustomError(charter, "HumanApprovalSemanticsUnspecified");
+    expect(await charter.checkPayment.staticCall(recipient.address, DAILY_CAP))
+      .to.deep.equal([false, constants.reasonCodes.REQUIRES_HUMAN_APPROVAL]);
   });
 
   it("returns max-per-transaction before daily-cap when both limits fail", async function () {
@@ -182,10 +182,108 @@ describe("SpendingCharter", function () {
     expect(await charter.getStatus()).to.deep.equal([0n, 0n, DAILY_CAP, 0n]);
   });
 
-  it.skip("human approval semantics pending specification", async function () {});
+  it("returns reason 5 above the threshold even with sufficient balance", async function () {
+    await charter.connect(owner).fund({ value: 100n });
+    expect(await charter.checkPayment.staticCall(recipient.address, HUMAN_THRESHOLD + 1n))
+      .to.deep.equal([false, constants.reasonCodes.REQUIRES_HUMAN_APPROVAL]);
+  });
 
-  it.skip("successful payments, insufficient-balance precedence, and 24-hour rollover pending human-approval semantics", async function () {
+  it("returns reason 5 above the threshold before insufficient balance", async function () {
+    expect(await charter.checkPayment.staticCall(recipient.address, HUMAN_THRESHOLD + 1n))
+      .to.deep.equal([false, constants.reasonCodes.REQUIRES_HUMAN_APPROVAL]);
+  });
+
+  it("checks insufficient balance at the exact human-approval threshold", async function () {
+    expect(await charter.checkPayment.staticCall(recipient.address, HUMAN_THRESHOLD))
+      .to.deep.equal([false, constants.reasonCodes.INSUFFICIENT_BALANCE]);
+  });
+
+  it("checks insufficient balance below the human-approval threshold", async function () {
+    expect(await charter.checkPayment.staticCall(recipient.address, HUMAN_THRESHOLD - 1n))
+      .to.deep.equal([false, constants.reasonCodes.INSUFFICIENT_BALANCE]);
+  });
+
+  it("allows an at-threshold payment when balance is sufficient", async function () {
+    await charter.connect(owner).fund({ value: HUMAN_THRESHOLD });
+    expect(await charter.checkPayment.staticCall(recipient.address, HUMAN_THRESHOLD))
+      .to.deep.equal([true, constants.reasonCodes.OK]);
+
+    const receiptId = ethers.id("at-threshold-payment");
+    await expect(charter.connect(agent).attemptPayment(recipient.address, HUMAN_THRESHOLD, receiptId))
+      .to.emit(charter, "PaymentExecuted")
+      .withArgs(receiptId, recipient.address, HUMAN_THRESHOLD, HUMAN_THRESHOLD);
+    expect(await charter.getBalance()).to.equal(0n);
+    expect(await charter.getDailySpent()).to.equal(HUMAN_THRESHOLD);
+  });
+
+  it("executes an eligible payment and updates balance and spending", async function () {
+    const paymentAmount = 20n;
+    const receiptId = ethers.id("eligible-payment");
+    await charter.connect(owner).fund({ value: 100n });
+    const contractBalanceBefore = await charter.getBalance();
+    const recipientBalanceBefore = await ethers.provider.getBalance(recipient.address);
+
+    await expect(charter.connect(agent).attemptPayment(recipient.address, paymentAmount, receiptId))
+      .to.emit(charter, "PaymentExecuted")
+      .withArgs(receiptId, recipient.address, paymentAmount, paymentAmount);
+
+    expect(await charter.getBalance()).to.equal(contractBalanceBefore - paymentAmount);
+    expect(await ethers.provider.getBalance(recipient.address)).to.equal(
+      recipientBalanceBefore + paymentAmount
+    );
+    expect(await charter.getDailySpent()).to.equal(paymentAmount);
+  });
+
+  it("does not transfer funds or increase spending for a reason-5 blocked payment", async function () {
+    const paymentAmount = HUMAN_THRESHOLD + 1n;
+    const receiptId = ethers.id("threshold-blocked-payment");
+    await charter.connect(owner).fund({ value: 100n });
+    const contractBalanceBefore = await charter.getBalance();
+    const recipientBalanceBefore = await ethers.provider.getBalance(recipient.address);
+
+    expect(await charter.connect(agent).attemptPayment.staticCall(
+      recipient.address,
+      paymentAmount,
+      receiptId
+    )).to.deep.equal([false, constants.reasonCodes.REQUIRES_HUMAN_APPROVAL]);
+
+    await expect(charter.connect(agent).attemptPayment(recipient.address, paymentAmount, receiptId))
+      .to.emit(charter, "PaymentBlocked")
+      .withArgs(receiptId, recipient.address, paymentAmount, constants.reasonCodes.REQUIRES_HUMAN_APPROVAL);
+
+    expect(await charter.getBalance()).to.equal(contractBalanceBefore);
+    expect(await ethers.provider.getBalance(recipient.address)).to.equal(recipientBalanceBefore);
+    expect(await charter.getDailySpent()).to.equal(0n);
+  });
+
+  it("resets the logical spending window after 24 hours and starts a fresh window on payment", async function () {
+    const firstAmount = 20n;
+    await charter.connect(owner).fund({ value: 100n });
+    await charter.connect(agent).attemptPayment(
+      recipient.address,
+      firstAmount,
+      ethers.id("before-window-expiry")
+    );
+
     await ethers.provider.send("evm_increaseTime", [24 * 60 * 60]);
     await ethers.provider.send("evm_mine", []);
+
+    expect(await charter.getDailySpent()).to.equal(0n);
+    expect(await charter.getDailyRemaining()).to.equal(DAILY_CAP);
+    const expiredStatus = await charter.getStatus();
+    expect(expiredStatus.windowStart).to.equal(0n);
+    expect(expiredStatus.spentInWindow).to.equal(0n);
+
+    const nextAmount = 10n;
+    const tx = await charter.connect(agent).attemptPayment(
+      recipient.address,
+      nextAmount,
+      ethers.id("after-window-expiry")
+    );
+    const receipt = await tx.wait();
+    const block = await ethers.provider.getBlock(receipt.blockNumber);
+
+    expect(await charter.getDailySpent()).to.equal(nextAmount);
+    expect((await charter.getStatus()).windowStart).to.equal(BigInt(block.timestamp));
   });
 });

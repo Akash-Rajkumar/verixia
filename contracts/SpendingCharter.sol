@@ -18,7 +18,6 @@ contract SpendingCharter is Ownable, ReentrancyGuard {
     error OnlyAgent();
     error InvalidAgent();
     error InvalidCounterpartyStatus();
-    error HumanApprovalSemanticsUnspecified();
 
     event PaymentExecuted(
         bytes32 indexed receiptId,
@@ -209,14 +208,12 @@ contract SpendingCharter is Ownable, ReentrancyGuard {
             return (false, EXCEEDS_DAILY_CAP);
         }
 
-        _humanApprovalDecisionIsUnspecified();
+        if (amount > rules.humanApprovalThreshold) {
+            return (false, REQUIRES_HUMAN_APPROVAL);
+        }
 
         if (amount > address(this).balance) return (false, INSUFFICIENT_BALANCE);
         return (true, OK);
-    }
-
-    function _humanApprovalDecisionIsUnspecified() internal pure {
-        revert HumanApprovalSemanticsUnspecified();
     }
 
     function _effectiveWindow() internal view returns (uint256 effectiveStart, uint256 effectiveSpent) {
