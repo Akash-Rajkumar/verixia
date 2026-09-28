@@ -1,0 +1,11 @@
+{
+  "network": "mstTestnet",
+  "chainId": 91562037,
+  "rpcUrl": "https://testnetrpc.mstblockchain.com",
+  "nativeCurrency": "tMSTC",
+  "nativeDecimals": 18,
+  "deployer": "0x8F90119B73B9EF8bC04d90b871F6db504b9EfFC0",
+  "goodAgent": "0x5D7C03A79570014e8cf335DCdBc9Fb87284Fdf4B",
+  "ReputationRegistry": "0xcE3bfbfC140AdD1a6A7eD1b1Aa571d0314f3Fb95",
+  "SpendingCharter": "0xbD4c07Adb44e8ff2030faBcf0c4543067bA95E69"
+}
