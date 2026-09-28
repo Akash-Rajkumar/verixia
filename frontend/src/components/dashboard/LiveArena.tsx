@@ -3,18 +3,13 @@ import { motion, AnimatePresence } from "framer-motion"
 import {
   ShieldAlert,
   ShieldCheck,
-  Terminal,
-  AlertOctagon,
-  UserX,
-  Cpu,
-  Shield,
-  Zap,
+  ShieldX,
   CheckCircle2,
-  XCircle,
   AlertTriangle,
+  ArrowRight,
+  Zap,
 } from "lucide-react"
 import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { truncateAddress } from "@/lib/format"
 import { ATTACK_TYPE_HUMAN_LABELS, REASON_CODE_LABELS } from "@/api/constants"
 import type { Agent, Message, TransactionAttempt } from "@/api/types"
@@ -26,16 +21,30 @@ export interface LiveArenaProps {
   transactions?: TransactionAttempt[]
 }
 
+interface EventPair {
+  id: string
+  badMessage?: Message
+  goodMessage?: Message
+  attempt?: TransactionAttempt
+  isSystem?: boolean
+  systemContent?: string
+  timestamp: string
+}
+
 export const LiveArena: React.FC<LiveArenaProps> = ({
   goodAgent,
   badAgent,
   messages,
   transactions = [],
 }) => {
-  const badScrollRef = useRef<HTMLDivElement>(null)
-  const goodScrollRef = useRef<HTMLDivElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
-  // Classify messages into Bad Agent (Left) vs Good Agent (Right)
+  // Helper to map message to its transaction attempt policy result
+  const findAttemptForMessage = (msgId: string): TransactionAttempt | undefined => {
+    return transactions.find((t) => t.triggerMessageId === msgId)
+  }
+
+  // Classify if message originated from Bad Agent
   const isBadAgentMessage = (msg: Message): boolean => {
     return (
       msg.senderAgentId === "agent-bad-01" ||
@@ -44,320 +53,297 @@ export const LiveArena: React.FC<LiveArenaProps> = ({
     )
   }
 
-  const badAgentMessages = useMemo(() => {
-    return messages.filter((m) => isBadAgentMessage(m))
-  }, [messages])
+  // Group messages into paired EventRows (Bad Attack + Good Sentinel Response + Security Result)
+  const eventPairs = useMemo<EventPair[]>(() => {
+    const pairs: EventPair[] = []
+    let i = 0
 
-  const goodAgentMessages = useMemo(() => {
-    return messages.filter((m) => !isBadAgentMessage(m))
-  }, [messages])
+    while (i < messages.length) {
+      const msg = messages[i]
 
-  // Independent auto-scrolling per lane
-  useEffect(() => {
-    if (badScrollRef.current) {
-      badScrollRef.current.scrollTop = badScrollRef.current.scrollHeight
+      // Case 1: System Event Message
+      if (msg.messageType === "system") {
+        pairs.push({
+          id: msg.id,
+          isSystem: true,
+          systemContent: msg.content,
+          timestamp: msg.createdAt,
+        })
+        i++
+        continue
+      }
+
+      // Case 2: Bad Agent Attack Message
+      if (isBadAgentMessage(msg)) {
+        const nextMsg = messages[i + 1]
+        let pairedGoodMsg: Message | undefined = undefined
+
+        // Check if next message is the Good Agent reply/response
+        if (nextMsg && !isBadAgentMessage(nextMsg) && nextMsg.messageType !== "system") {
+          pairedGoodMsg = nextMsg
+        }
+
+        const attempt =
+          findAttemptForMessage(msg.id) ||
+          (pairedGoodMsg ? findAttemptForMessage(pairedGoodMsg.id) : undefined)
+
+        pairs.push({
+          id: `pair-${msg.id}`,
+          badMessage: msg,
+          goodMessage: pairedGoodMsg,
+          attempt,
+          timestamp: msg.createdAt,
+        })
+
+        i += pairedGoodMsg ? 2 : 1
+        continue
+      }
+
+      // Case 3: Standalone Good Agent / Counterparty Message (e.g., Legitimate Offer)
+      const attempt = findAttemptForMessage(msg.id)
+      pairs.push({
+        id: `pair-${msg.id}`,
+        goodMessage: msg,
+        attempt,
+        timestamp: msg.createdAt,
+      })
+      i++
     }
-  }, [badAgentMessages.length])
 
+    return pairs
+  }, [messages, transactions])
+
+  // Auto-scroll to bottom of single scroll container when events update
   useEffect(() => {
-    if (goodScrollRef.current) {
-      goodScrollRef.current.scrollTop = goodScrollRef.current.scrollHeight
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [goodAgentMessages.length])
-
-  // Helper to map message to its transaction attempt policy result
-  const findAttemptForMessage = (msgId: string): TransactionAttempt | undefined => {
-    return transactions.find((t) => t.triggerMessageId === msgId)
-  }
-
-  // Check if latest transaction attempt was blocked for the central security pulse indicator
-  const latestAttempt = transactions.length > 0 ? transactions[transactions.length - 1] : null
-  const isLatestBlocked = latestAttempt?.status === "blocked"
+  }, [eventPairs.length])
 
   return (
-    <Card className="w-full bg-[#05070a] border-slate-800/90 shadow-2xl overflow-hidden flex flex-col h-[580px] rounded-2xl">
+    <Card className="w-full bg-[#040609] border-slate-800/80 shadow-2xl overflow-hidden flex flex-col h-[580px] rounded-2xl">
       
       {/* 1. ARENA HEADER */}
       <div className="px-5 py-3 bg-[#070a0f] border-b border-slate-800/80 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.2)]">
-            <Terminal className="w-3.5 h-3.5" />
-          </div>
-          <div>
-            <h2 className="text-xs font-bold font-mono tracking-widest text-slate-100 uppercase flex items-center gap-2">
-              <span>&gt;_ LIVE ADVERSARIAL ARENA</span>
-            </h2>
-          </div>
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+          <h2 className="text-xs font-bold font-mono tracking-widest text-zinc-200 uppercase flex items-center gap-2">
+            <span>LIVE ATTACK SIMULATION</span>
+          </h2>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-slate-900/90 border border-slate-800 px-3 py-1 rounded-full">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-            <span className="text-[11px] font-mono text-cyan-400 font-semibold tracking-wider">
-              {messages.length} EVENTS CAPTURED // LIVE
-            </span>
-          </div>
+        <div className="flex items-center gap-2 text-xs font-mono text-zinc-400 font-medium">
+          <span className="text-zinc-300 font-semibold">{messages.length}</span>
+          <span>events · LIVE</span>
         </div>
       </div>
 
-      {/* 2. AGENT IDENTITY HEADERS (SPLIT TOP BAR) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 bg-[#06080d] border-b border-slate-800/80 shrink-0 text-xs font-mono">
+      {/* 2. AGENT SUB-HEADERS (FIXED TOP ROW) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 bg-[#06080e] border-b border-slate-800/80 shrink-0 text-xs font-mono">
         
-        {/* LEFT HEADER: BAD AGENT */}
-        <div className="p-3.5 border-b md:border-b-0 md:border-r border-slate-800/80 flex items-center justify-between bg-[#0f0608]/90">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-red-950/80 border border-red-500/50 flex items-center justify-center text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.25)]">
-              <UserX className="w-4.5 h-4.5" />
-            </div>
+        {/* LEFT SUB-HEADER: BAD AGENT */}
+        <div className="p-3 border-b md:border-b-0 md:border-r border-slate-800/80 flex items-center justify-between bg-[#0e0709]/80">
+          <div className="flex items-center gap-2.5">
+            <span className="text-sm">🔴</span>
             <div>
               <div className="font-bold text-red-400 flex items-center gap-2">
-                <span className="text-sm tracking-wide">{badAgent?.name || "Malicious Adversary"}</span>
-                <Badge variant="red" className="text-[9px] py-0 px-1.5 font-mono">
+                <span>{badAgent?.name || "Malicious Adversary"}</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-red-950/60 border border-red-900/40 text-red-400 font-mono">
                   BAD AGENT
-                </Badge>
+                </span>
               </div>
-              <div className="text-[10px] text-slate-400 flex items-center gap-2 mt-0.5">
-                <span>WALLET: <span className="text-slate-300 font-semibold">{truncateAddress(badAgent?.walletAddress || "0x90F79bf6EB2c4f870365E785982E1f101E93b906")}</span></span>
+              <div className="text-[10px] text-zinc-500 mt-0.5">
+                {truncateAddress(badAgent?.walletAddress || "0x90F79bf6EB2c4f870365E785982E1f101E93b906")} · {badAgent?.modelProvider?.toUpperCase() || "OLLAMA"}
               </div>
             </div>
-          </div>
-          <div className="text-right text-[10px] text-slate-400 flex items-center gap-1.5 bg-red-950/30 border border-red-900/40 px-2 py-1 rounded">
-            <Cpu className="w-3.5 h-3.5 text-red-400" />
-            <span className="font-semibold text-slate-300">{badAgent?.modelProvider?.toUpperCase() || "OLLAMA"}</span>
           </div>
         </div>
 
-        {/* RIGHT HEADER: GOOD AGENT */}
-        <div className="p-3.5 flex items-center justify-between bg-[#050e17]/90">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-cyan-950/80 border border-cyan-500/50 flex items-center justify-center text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.25)]">
-              <ShieldCheck className="w-4.5 h-4.5" />
-            </div>
+        {/* RIGHT SUB-HEADER: GOOD AGENT */}
+        <div className="p-3 flex items-center justify-between bg-[#060d16]/80">
+          <div className="flex items-center gap-2.5">
+            <span className="text-sm">🔵</span>
             <div>
               <div className="font-bold text-cyan-300 flex items-center gap-2">
-                <span className="text-sm tracking-wide">{goodAgent?.name || "Verixia Sentinel"}</span>
-                <Badge variant="cyan" className="text-[9px] py-0 px-1.5 font-mono">
+                <span>{goodAgent?.name || "Verixia Sentinel"}</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-950/60 border border-cyan-900/40 text-cyan-400 font-mono">
                   GOOD AGENT
-                </Badge>
+                </span>
               </div>
-              <div className="text-[10px] text-slate-400 flex items-center gap-2 mt-0.5">
-                <span>WALLET: <span className="text-slate-300 font-semibold">{truncateAddress(goodAgent?.walletAddress || "0x71C7656EC7ab88b098defB751B7401B5f6d8976F")}</span></span>
+              <div className="text-[10px] text-zinc-500 mt-0.5">
+                {truncateAddress(goodAgent?.walletAddress || "0x71C7656EC7ab88b098defB751B7401B5f6d8976F")} · {goodAgent?.modelProvider?.toUpperCase() || "GEMINI"}
               </div>
             </div>
-          </div>
-          <div className="text-right text-[10px] text-slate-400 flex items-center gap-1.5 bg-cyan-950/30 border border-cyan-900/40 px-2 py-1 rounded">
-            <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="font-semibold text-slate-300">{goodAgent?.modelProvider?.toUpperCase() || "GEMINI 1.5 PRO"}</span>
           </div>
         </div>
       </div>
 
-      {/* 3. MAIN ARENA CONTENT CONTAINER (2-COLUMN SPLIT WITH CENTRAL DIVIDER) */}
-      <div className="flex-1 relative overflow-hidden bg-[#040609]">
-        
-        {messages.length === 0 ? (
+      {/* 3. MAIN CONVERSATIONAL STREAM (ONE SHARED SCROLL CONTAINER) */}
+      <div
+        ref={scrollRef}
+        className="flex-1 p-4 overflow-y-auto space-y-4 bg-[#030507] scrollbar-thin scrollbar-thumb-slate-800/60"
+      >
+        {eventPairs.length === 0 ? (
           /* EMPTY STATE */
-          <div className="h-full flex flex-col items-center justify-center p-6 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-4 shadow-[0_0_30px_rgba(6,182,212,0.15)] animate-pulse">
-              <ShieldAlert className="w-8 h-8" />
+          <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-3">
+            <div className="w-12 h-12 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-center text-zinc-500">
+              <ShieldAlert className="w-6 h-6 text-zinc-400 animate-pulse" />
             </div>
-            <h3 className="text-sm font-bold font-mono text-slate-200 tracking-wider uppercase mb-1">
-              WAITING FOR ADVERSARIAL ACTIVITY
-            </h3>
-            <p className="text-xs text-slate-400 max-w-md">
-              Run an attack sequence from the Demo Controls panel below to test Verixia's on-chain Spending Charter enforcement in real time.
-            </p>
+            <div>
+              <h3 className="text-xs font-bold font-mono text-zinc-300 uppercase tracking-wider">
+                Waiting for an adversarial request...
+              </h3>
+              <p className="text-[11px] text-zinc-500 mt-1 max-w-sm">
+                Run an attack sequence from the Demo Controls panel below to observe real-time policy enforcement.
+              </p>
+            </div>
           </div>
         ) : (
-          <div className="h-full grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-800/80 relative">
-            
-            {/* CENTRAL SECURITY DIVIDER OVERLAY (DESKTOP ONLY) */}
-            <div className="hidden md:flex absolute inset-y-0 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex-col items-center justify-between py-4">
-              <div className="bg-[#0b1019] border border-slate-700/80 text-cyan-400 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full shadow-lg tracking-widest">
-                VS
-              </div>
-
-              {/* Animated Shield Trigger on Blocked State */}
-              <AnimatePresence>
-                {isLatestBlocked && (
+          <AnimatePresence initial={false}>
+            {eventPairs.map((pair) => {
+              // System event rendering
+              if (pair.isSystem) {
+                return (
                   <motion.div
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="bg-red-950/90 border border-red-500/80 text-red-400 px-2.5 py-1 rounded-lg shadow-[0_0_20px_rgba(239,68,68,0.5)] flex flex-col items-center gap-0.5"
+                    key={pair.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="flex items-center justify-center my-2"
                   >
-                    <Shield className="w-4 h-4 text-red-400 animate-bounce" />
-                    <span className="text-[9px] font-mono font-extrabold uppercase tracking-tighter">
-                      CHARTER BLOCKED
-                    </span>
+                    <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest bg-slate-900/40 border border-slate-800/60 px-3 py-1 rounded-full">
+                      ─── {pair.systemContent} ───
+                    </div>
                   </motion.div>
-                )}
-              </AnimatePresence>
+                )
+              }
 
-              <div className="bg-[#0b1019] border border-slate-800 text-slate-400 text-[9px] font-mono px-2 py-0.5 rounded uppercase tracking-tighter opacity-80">
-                SECURITY BOUNDARY
-              </div>
-            </div>
+              const attackLabel = pair.badMessage?.attackType
+                ? ATTACK_TYPE_HUMAN_LABELS[pair.badMessage.attackType] || pair.badMessage.attackType.toUpperCase()
+                : "MALICIOUS REQUEST"
 
-            {/* LEFT LANE: BAD AGENT (ATTACKS) */}
-            <div
-              ref={badScrollRef}
-              className="p-4 overflow-y-auto space-y-3.5 bg-[#0a0507]/40 h-full scrollbar-thin scrollbar-thumb-slate-800"
-            >
-              <div className="text-[10px] font-mono font-semibold text-red-500/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <AlertOctagon className="w-3 h-3 text-red-400" />
-                <span>ATTACK STREAM ({badAgentMessages.length})</span>
-              </div>
+              const isOffer = pair.goodMessage?.messageType === "offer"
 
-              <AnimatePresence initial={false}>
-                {badAgentMessages.map((msg) => {
-                  const attempt = findAttemptForMessage(msg.id)
-                  const attackLabel = msg.attackType
-                    ? ATTACK_TYPE_HUMAN_LABELS[msg.attackType] || msg.attackType.toUpperCase()
-                    : "MALICIOUS PROMPT"
-
-                  return (
-                    <motion.div
-                      key={msg.id}
-                      initial={{ opacity: 0, x: -20, scale: 0.97 }}
-                      animate={{ opacity: 1, x: 0, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                      className="w-full"
-                    >
-                      <div className="rounded-xl p-3.5 bg-[#16080b]/90 border border-red-500/40 text-slate-100 shadow-[0_0_18px_rgba(239,68,68,0.15)] transition-all hover:border-red-500/60">
-                        
-                        {/* Header: Attack Label & Timestamp */}
-                        <div className="flex items-center justify-between gap-2 border-b border-red-500/20 pb-2 mb-2 text-xs font-mono">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="red" className="gap-1 text-[10px] font-bold tracking-wider py-0.5">
-                              <AlertOctagon className="w-3 h-3" />
+              return (
+                <motion.div
+                  key={pair.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="rounded-xl border border-slate-800/40 bg-[#06080d]/60 p-3.5 hover:border-slate-700/50 transition-colors shadow-sm"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 items-center">
+                    
+                    {/* LEFT COLUMN: BAD AGENT ATTACK BUBBLE */}
+                    <div className="w-full">
+                      {pair.badMessage ? (
+                        <div className="bg-[#13090b] border border-red-900/30 rounded-xl p-3 text-xs text-zinc-200 shadow-sm">
+                          <div className="flex items-center justify-between border-b border-red-950/60 pb-1.5 mb-2 text-[10px] font-mono">
+                            <span className="font-semibold text-red-400 flex items-center gap-1.5">
+                              <AlertTriangle className="w-3 h-3 text-red-400" />
                               {attackLabel}
-                            </Badge>
+                            </span>
+                            <span className="text-zinc-500 font-mono">
+                              {new Date(pair.badMessage.createdAt).toLocaleTimeString()}
+                            </span>
                           </div>
-                          <span className="text-[10px] text-red-300/60 font-mono">
-                            {new Date(msg.createdAt).toLocaleTimeString()}
+                          <p className="font-sans leading-relaxed text-zinc-200">
+                            "{pair.badMessage.content}"
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="hidden md:block opacity-0"></div>
+                      )}
+                    </div>
+
+                    {/* CENTER COLUMN: OUTCOME / POLICY INDICATOR */}
+                    <div className="flex items-center justify-center my-1 md:my-0 px-2 shrink-0">
+                      {pair.attempt?.status === "blocked" && (
+                        <div className="flex flex-col items-center justify-center text-center px-2.5 py-1.5 bg-red-950/70 border border-red-500/40 rounded-xl shadow-[0_0_12px_rgba(239,68,68,0.2)]">
+                          <div className="flex items-center gap-1.5 text-red-400 text-[10px] font-mono font-bold uppercase tracking-wider">
+                            <ShieldX className="w-3.5 h-3.5 text-red-400" />
+                            <span>BLOCKED BY CHARTER</span>
+                          </div>
+                          <span className="text-[9px] font-mono text-red-300/80 mt-0.5 uppercase tracking-tight">
+                            {pair.attempt.blockReasonCode !== null
+                              ? REASON_CODE_LABELS[pair.attempt.blockReasonCode] || `CODE_${pair.attempt.blockReasonCode}`
+                              : "POLICY_VIOLATION"}
                           </span>
                         </div>
+                      )}
 
-                        {/* Attack Content Prompt */}
-                        <p className="text-xs text-slate-200 font-mono leading-relaxed break-words bg-black/40 p-2.5 rounded-lg border border-red-950/60">
-                          "{msg.content}"
-                        </p>
-
-                        {/* Status Footer */}
-                        <div className="mt-2.5 pt-2 border-t border-red-500/20 flex items-center justify-between text-[11px] font-mono">
-                          <span className="text-slate-400 text-[10px]">THREAT STATUS:</span>
-                          {attempt?.status === "blocked" ? (
-                            <Badge variant="red" className="gap-1 font-bold text-[10px] shadow-[0_0_10px_rgba(239,68,68,0.3)]">
-                              <Shield className="w-3 h-3 text-red-400" />
-                              BLOCKED BY CHARTER
-                            </Badge>
-                          ) : (
-                            <Badge variant="red" className="gap-1 font-bold text-[10px]">
-                              <AlertTriangle className="w-3 h-3" />
-                              ATTACK DETECTED
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )
-                })}
-              </AnimatePresence>
-            </div>
-
-            {/* RIGHT LANE: GOOD AGENT (RESPONSES & EVALUATIONS) */}
-            <div
-              ref={goodScrollRef}
-              className="p-4 overflow-y-auto space-y-3.5 bg-[#050b14]/40 h-full scrollbar-thin scrollbar-thumb-slate-800"
-            >
-              <div className="text-[10px] font-mono font-semibold text-cyan-500/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <ShieldCheck className="w-3 h-3 text-cyan-400" />
-                <span>SENTINEL RESPONSE STREAM ({goodAgentMessages.length})</span>
-              </div>
-
-              <AnimatePresence initial={false}>
-                {goodAgentMessages.map((msg) => {
-                  const attempt = findAttemptForMessage(msg.id)
-                  const isOffer = msg.messageType === "offer"
-
-                  return (
-                    <motion.div
-                      key={msg.id}
-                      initial={{ opacity: 0, x: 20, scale: 0.97 }}
-                      animate={{ opacity: 1, x: 0, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                      className="w-full"
-                    >
-                      <div
-                        className={`rounded-xl p-3.5 border transition-all shadow-lg ${
-                          isOffer
-                            ? "bg-[#051710]/90 border-emerald-500/40 text-slate-100 shadow-[0_0_18px_rgba(16,185,129,0.15)] hover:border-emerald-500/60"
-                            : "bg-[#07131e]/90 border-cyan-500/40 text-slate-100 shadow-[0_0_18px_rgba(6,182,212,0.15)] hover:border-cyan-500/60"
-                        }`}
-                      >
-                        {/* Header: Sentinel / Offer Tag & Timestamp */}
-                        <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2 mb-2 text-xs font-mono">
-                          <div className="flex items-center gap-2">
-                            {isOffer ? (
-                              <Badge variant="emerald" className="gap-1 text-[10px] font-bold tracking-wider py-0.5">
-                                <Zap className="w-3 h-3 text-emerald-400" />
-                                COUNTERPARTY OFFER
-                              </Badge>
-                            ) : (
-                              <Badge variant="cyan" className="gap-1 text-[10px] font-bold tracking-wider py-0.5">
-                                <ShieldCheck className="w-3 h-3 text-cyan-400" />
-                                VERIXIA SENTINEL
-                              </Badge>
-                            )}
+                      {pair.attempt?.status === "executed" && (
+                        <div className="flex flex-col items-center justify-center text-center px-2.5 py-1.5 bg-emerald-950/70 border border-emerald-500/40 rounded-xl shadow-[0_0_12px_rgba(16,185,129,0.2)]">
+                          <div className="flex items-center gap-1.5 text-emerald-400 text-[10px] font-mono font-bold uppercase tracking-wider">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>EXECUTED ON-CHAIN</span>
                           </div>
-                          <span className="text-[10px] text-slate-400 font-mono">
-                            {new Date(msg.createdAt).toLocaleTimeString()}
-                          </span>
                         </div>
+                      )}
 
-                        {/* Content Text */}
-                        <p className="text-xs text-slate-200 font-mono leading-relaxed break-words bg-black/40 p-2.5 rounded-lg border border-slate-800">
-                          {msg.content}
-                        </p>
-
-                        {/* Status Footer */}
-                        {attempt && (
-                          <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between text-[11px] font-mono">
-                            <span className="text-slate-400 text-[10px]">CHARTER RESULT:</span>
-
-                            {attempt.status === "blocked" && (
-                              <Badge variant="red" className="gap-1 font-bold text-[10px] shadow-[0_0_10px_rgba(239,68,68,0.3)]">
-                                <XCircle className="w-3 h-3 text-red-400" />
-                                BLOCKED ({attempt.blockReasonCode !== null ? REASON_CODE_LABELS[attempt.blockReasonCode] || attempt.blockReasonCode : "POLICY"})
-                              </Badge>
-                            )}
-
-                            {attempt.status === "declined" && (
-                              <Badge variant="amber" className="gap-1 font-bold text-[10px]">
-                                <AlertTriangle className="w-3 h-3 text-amber-400" />
-                                DECLINED BY AGENT
-                              </Badge>
-                            )}
-
-                            {attempt.status === "executed" && (
-                              <Badge variant="emerald" className="gap-1 font-bold text-[10px] shadow-[0_0_10px_rgba(16,185,129,0.3)]">
-                                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                                EXECUTED ON-CHAIN
-                              </Badge>
-                            )}
+                      {pair.attempt?.status === "declined" && (
+                        <div className="flex flex-col items-center justify-center text-center px-2.5 py-1.5 bg-amber-950/70 border border-amber-500/40 rounded-xl">
+                          <div className="flex items-center gap-1.5 text-amber-400 text-[10px] font-mono font-bold uppercase tracking-wider">
+                            <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
+                            <span>DECLINED BY AGENT</span>
                           </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )
-                })}
-              </AnimatePresence>
-            </div>
-          </div>
+                        </div>
+                      )}
+
+                      {!pair.attempt && (
+                        <div className="text-zinc-600 font-mono text-xs flex items-center justify-center">
+                          <ArrowRight className="w-4 h-4 opacity-40" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* RIGHT COLUMN: GOOD AGENT RESPONSE BUBBLE */}
+                    <div className="w-full">
+                      {pair.goodMessage ? (
+                        <div
+                          className={`rounded-xl p-3 text-xs text-zinc-200 border shadow-sm ${
+                            isOffer
+                              ? "bg-[#051710] border-emerald-900/40"
+                              : "bg-[#09111a] border-cyan-900/40"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between border-b border-white/5 pb-1.5 mb-2 text-[10px] font-mono">
+                            <span
+                              className={`font-semibold flex items-center gap-1.5 ${
+                                isOffer ? "text-emerald-400" : "text-cyan-400"
+                              }`}
+                            >
+                              {isOffer ? (
+                                <>
+                                  <Zap className="w-3 h-3 text-emerald-400" />
+                                  COUNTERPARTY OFFER
+                                </>
+                              ) : (
+                                <>
+                                  <ShieldCheck className="w-3 h-3 text-cyan-400" />
+                                  VERIXIA SENTINEL
+                                </>
+                              )}
+                            </span>
+                            <span className="text-zinc-500 font-mono">
+                              {new Date(pair.goodMessage.createdAt).toLocaleTimeString()}
+                            </span>
+                          </div>
+                          <p className="font-sans leading-relaxed text-zinc-200">
+                            {pair.goodMessage.content}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="hidden md:block opacity-0"></div>
+                      )}
+                    </div>
+
+                  </div>
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
         )}
       </div>
 
