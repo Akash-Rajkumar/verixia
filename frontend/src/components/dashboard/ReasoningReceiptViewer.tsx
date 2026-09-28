@@ -84,12 +84,12 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
   // 1. NO TRANSACTION SELECTED STATE
   if (!selectedAttempt) {
     return (
-      <Card className="w-full bg-[#0f1433]/90 border-violet-900/40 shadow-2xl p-6 flex flex-col items-center justify-center text-center h-[520px]">
-        <FileCheck2 className="w-12 h-12 text-[#7c86b8] animate-pulse mb-3" />
-        <h3 className="text-sm font-bold font-mono text-cyan-300 uppercase tracking-wider">
+      <Card className="w-full bg-black border-white/15 shadow-2xl p-6 flex flex-col items-center justify-center text-center h-[520px] rounded-2xl">
+        <FileCheck2 className="w-12 h-12 text-[#dfff00] animate-pulse mb-3" />
+        <h3 className="text-sm font-bold font-mono text-white uppercase tracking-wider">
           SELECT A TRANSACTION IN THE LEDGER
         </h3>
-        <p className="text-xs text-[#c4c7dc] max-w-sm mt-1">
+        <p className="text-xs text-white/60 max-w-sm mt-1">
           Click any transaction row in the ledger above to inspect its cryptographic reasoning receipt and on-chain verification proof.
         </p>
       </Card>
@@ -99,13 +99,13 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
   // 2. RECEIPT NULL STATE
   if (!receipt) {
     return (
-      <Card className="w-full bg-[#0f1433]/90 border-violet-900/40 shadow-2xl p-6 flex flex-col items-center justify-center text-center h-[520px]">
-        <AlertTriangle className="w-12 h-12 text-amber-400/80 mb-3" />
-        <h3 className="text-sm font-bold font-mono text-amber-300 uppercase tracking-wider">
+      <Card className="w-full bg-black border-white/15 shadow-2xl p-6 flex flex-col items-center justify-center text-center h-[520px] rounded-2xl">
+        <AlertTriangle className="w-12 h-12 text-white/60 mb-3" />
+        <h3 className="text-sm font-bold font-mono text-white uppercase tracking-wider">
           REASONING RECEIPT NOT AVAILABLE YET
         </h3>
-        <p className="text-xs text-[#c4c7dc] max-w-sm mt-1">
-          No on-chain reasoning receipt was attached to transaction attempt <span className="font-mono text-[#f1f2ff]">{selectedAttempt.id}</span>.
+        <p className="text-xs text-white/60 max-w-sm mt-1">
+          No on-chain reasoning receipt was attached to transaction attempt <span className="font-mono text-[#dfff00]">{selectedAttempt.id}</span>.
         </p>
       </Card>
     )
@@ -117,25 +117,24 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
 
   return (
     <Card
-      variant={isBlocked ? "glow-red" : isExecuted ? "glow-emerald" : "glow-violet"}
-      className="w-full bg-[#0f1433]/95 border-violet-900/40 shadow-2xl p-5 flex flex-col h-[520px] overflow-hidden"
+      className="w-full bg-black border-white/15 shadow-2xl p-5 flex flex-col h-[520px] overflow-hidden rounded-2xl"
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-indigo-900/40 pb-3 mb-3">
+      <div className="flex items-center justify-between border-b border-white/12 pb-3 mb-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-[#1d163e]/90 border border-violet-500/50 flex items-center justify-center shadow-[0_0_18px_rgba(124,108,245,0.3)]">
-            <Sparkles className="w-5 h-5 text-cyan-400" />
+          <div className="w-9 h-9 rounded-xl bg-black border border-[#dfff00]/60 flex items-center justify-center shadow-[0_0_18px_rgba(223,255,0,0.2)]">
+            <Sparkles className="w-5 h-5 text-[#dfff00]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold font-mono text-[#f1f2ff] uppercase tracking-wider">
+              <h3 className="text-sm font-bold font-mono text-white uppercase tracking-wider">
                 Reasoning Receipt Viewer
               </h3>
-              <Badge variant="violet" className="text-[10px] py-0 px-1.5">
+              <Badge variant="cyan" className="text-[10px] py-0 px-1.5">
                 ON-CHAIN PROOF
               </Badge>
             </div>
-            <p className="text-[11px] text-[#c4c7dc] font-mono">
+            <p className="text-[11px] text-white/50 font-mono">
               Receipt ID: {receipt.receiptId}
             </p>
           </div>
@@ -144,20 +143,20 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
         {/* Decision Badge Header */}
         <div className="flex items-center gap-2">
           {isBlocked && (
-            <Badge variant="red" className="text-xs py-1 px-3 gap-1 font-bold shadow-[0_0_12px_rgba(251,79,99,0.3)]">
-              <ShieldAlert className="w-3.5 h-3.5 text-rose-300" />
+            <Badge variant="red" className="text-xs py-1 px-3 gap-1 font-bold">
+              <ShieldAlert className="w-3.5 h-3.5 text-[#dfff00]" />
               BLOCKED BY CHARTER
             </Badge>
           )}
           {isExecuted && (
-            <Badge variant="emerald" className="text-xs py-1 px-3 gap-1 font-bold shadow-[0_0_12px_rgba(52,211,153,0.3)]">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-300" />
+            <Badge variant="emerald" className="text-xs py-1 px-3 gap-1 font-bold">
+              <ShieldCheck className="w-3.5 h-3.5 text-white" />
               EXECUTED ON-CHAIN
             </Badge>
           )}
           {!isBlocked && !isExecuted && (
             <Badge variant="amber" className="text-xs py-1 px-3 gap-1 font-bold">
-              <AlertTriangle className="w-3.5 h-3.5" />
+              <AlertTriangle className="w-3.5 h-3.5 text-white/80" />
               DECLINED BY AGENT
             </Badge>
           )}
@@ -165,33 +164,33 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
       </div>
 
       {/* Main Body */}
-      <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+      <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-thin scrollbar-thumb-white/20">
         
         {/* 1. DECISION SUMMARY AUDIT BOX */}
-        <div className="p-3.5 bg-[#0a0f26]/80 border border-indigo-900/40 rounded-xl space-y-1">
-          <span className="text-[10px] font-mono text-[#858aa6] uppercase tracking-wider block">
+        <div className="p-3.5 bg-[#0a0a0a] border border-white/12 rounded-xl space-y-1">
+          <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider block">
             Executive Decision Summary
           </span>
-          <p className="text-xs font-semibold text-[#f1f2ff] leading-relaxed font-sans">
+          <p className="text-xs font-semibold text-white leading-relaxed font-sans">
             {receipt.reasoningSummary}
           </p>
         </div>
 
         {/* 2. MANIPULATION SIGNALS */}
         <div className="space-y-1.5 font-mono">
-          <span className="text-[10px] text-[#858aa6] uppercase tracking-wider block">
+          <span className="text-[10px] text-white/50 uppercase tracking-wider block">
             Detected Manipulation Signals
           </span>
           <div className="flex flex-wrap gap-1.5">
             {rf.manipulationSignals && rf.manipulationSignals.length > 0 ? (
               rf.manipulationSignals.map((signal, idx) => (
                 <Badge key={idx} variant="red" className="text-[10px] py-0.5 px-2 gap-1">
-                  <AlertOctagon className="w-3 h-3" />
+                  <AlertOctagon className="w-3 h-3 text-[#dfff00]" />
                   {signal}
                 </Badge>
               ))
             ) : (
-              <span className="text-xs text-emerald-300 font-bold bg-[#092723]/90 border border-emerald-500/40 px-2.5 py-1 rounded-md inline-block shadow-[0_0_12px_rgba(52,211,153,0.2)]">
+              <span className="text-xs text-white font-bold bg-black border border-white/30 px-2.5 py-1 rounded-md inline-block shadow-[0_0_12px_rgba(255,255,255,0.08)]">
                 ✓ NO MANIPULATION SIGNALS DETECTED
               </span>
             )}
@@ -199,11 +198,11 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
         </div>
 
         {/* 3. RATIONALE */}
-        <div className="p-3 bg-[#0a0f26]/60 border border-indigo-900/40 rounded-xl space-y-1 font-sans">
-          <span className="text-[10px] font-mono text-[#858aa6] uppercase tracking-wider block">
+        <div className="p-3 bg-[#0a0a0a] border border-white/12 rounded-xl space-y-1 font-sans">
+          <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider block">
             Agent Rationale
           </span>
-          <p className="text-xs text-[#c4c7dc] leading-relaxed">
+          <p className="text-xs text-white/80 leading-relaxed">
             {rf.rationale}
           </p>
         </div>
@@ -212,12 +211,12 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
           
           {/* Reputation Check */}
-          <div className="p-3 bg-[#0a0f26]/60 border border-indigo-900/40 rounded-xl space-y-1">
-            <span className="text-[10px] text-[#858aa6] uppercase block">Reputation Verification</span>
+          <div className="p-3 bg-[#0a0a0a] border border-white/12 rounded-xl space-y-1">
+            <span className="text-[10px] text-white/50 uppercase block">Reputation Verification</span>
             {rf.reputationChecked.enabled ? (
               <div className="space-y-1 text-[11px]">
-                <div className="text-[#f1f2ff]">Feedback Count: {rf.reputationChecked.feedbackCount}</div>
-                <div className="grid grid-cols-2 gap-1 text-[10px] text-[#c4c7dc]">
+                <div className="text-white">Feedback Count: {rf.reputationChecked.feedbackCount}</div>
+                <div className="grid grid-cols-2 gap-1 text-[10px] text-white/70">
                   <span>Comp: {rf.reputationChecked.axes.competence ?? "NO DATA"}</span>
                   <span>Hon: {rf.reputationChecked.axes.honesty ?? "NO DATA"}</span>
                   <span>Compl: {rf.reputationChecked.axes.compliance ?? "NO DATA"}</span>
@@ -225,19 +224,19 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
                 </div>
               </div>
             ) : (
-              <span className="text-[#7c86b8] italic">REPUTATION CHECK DISABLED</span>
+              <span className="text-white/40 italic">REPUTATION CHECK DISABLED</span>
             )}
           </div>
 
           {/* Model Info */}
-          <div className="p-3 bg-[#0a0f26]/60 border border-indigo-900/40 rounded-xl space-y-1">
-            <span className="text-[10px] text-[#858aa6] uppercase block">AI Model Metadata</span>
-            <div className="flex items-center gap-1.5 font-bold text-[#f1f2ff]">
-              <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+          <div className="p-3 bg-[#0a0a0a] border border-white/12 rounded-xl space-y-1">
+            <span className="text-[10px] text-white/50 uppercase block">AI Model Metadata</span>
+            <div className="flex items-center gap-1.5 font-bold text-white">
+              <Cpu className="w-3.5 h-3.5 text-[#dfff00]" />
               <span>{rf.model.provider.toUpperCase()} ({rf.model.name})</span>
             </div>
             {rf.model.fellBack && (
-              <Badge variant="amber" className="text-[9px] py-0 px-1 mt-1">
+              <Badge variant="cyan" className="text-[9px] py-0 px-1 mt-1">
                 FELL BACK TO OLLAMA
               </Badge>
             )}
@@ -246,42 +245,36 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
         </div>
 
         {/* 5. REASONING HASH & ON-CHAIN VERIFICATION PROOF */}
-        <div className="p-3.5 bg-[#091024]/90 border border-indigo-900/50 rounded-xl space-y-3 font-mono text-xs">
+        <div className="p-3.5 bg-[#050505] border border-white/15 rounded-xl space-y-3 font-mono text-xs">
           
           <div className="flex items-center justify-between">
-            <span className="text-[#c4c7dc] flex items-center gap-1">
-              <Hash className="w-3.5 h-3.5 text-cyan-400" /> Cryptographic Reasoning Hash:
+            <span className="text-white/70 flex items-center gap-1">
+              <Hash className="w-3.5 h-3.5 text-[#dfff00]" /> Cryptographic Reasoning Hash:
             </span>
             <div className="flex items-center gap-2">
-              <span className="text-cyan-300 font-bold">{truncateHash(receipt.reasoningHash, 10, 8)}</span>
+              <span className="text-[#dfff00] font-bold">{truncateHash(receipt.reasoningHash, 10, 8)}</span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => handleCopyHash(receipt.reasoningHash)}
-                className="p-1 h-6 text-[#c4c7dc] hover:text-white"
+                className="p-1 h-6 text-white/70 hover:text-[#dfff00]"
               >
-                {copiedHash ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedHash ? <Check className="w-3.5 h-3.5 text-[#dfff00]" /> : <Copy className="w-3.5 h-3.5" />}
               </Button>
             </div>
           </div>
 
           {/* Verification Controls & Visual Status */}
-          <div className="pt-2 border-t border-indigo-900/40 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="pt-2 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
             
             <Button
-              variant={
-                verificationResult?.verified
-                  ? "primary"
-                  : verificationResult?.verified === false
-                  ? "danger"
-                  : "primary"
-              }
+              variant="primary"
               size="md"
               isLoading={verifying}
               onClick={handleVerify}
-              className="w-full sm:w-auto font-mono text-xs font-bold gap-2 py-2 px-4 bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white border-none shadow-[0_0_20px_rgba(124,108,245,0.35)]"
+              className="w-full sm:w-auto font-mono text-xs font-bold gap-2 py-2 px-4 bg-black text-white hover:bg-[#dfff00] hover:text-black border border-[#dfff00]/70 shadow-[0_0_20px_rgba(223,255,0,0.18)]"
             >
-              <ShieldCheck className="w-4 h-4 text-white" />
+              <ShieldCheck className="w-4 h-4" />
               {verifying ? "COMPUTING HASH MATCH..." : "VERIFY ON-CHAIN"}
             </Button>
 
@@ -290,10 +283,10 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  className="flex items-center gap-1.5 text-emerald-300 font-bold text-xs bg-[#092723]/90 border border-emerald-500/50 px-3 py-1.5 rounded-lg shadow-[0_0_15px_rgba(52,211,153,0.3)]"
+                  className="flex items-center gap-1.5 text-[#dfff00] font-bold text-xs bg-black border border-[#dfff00]/60 px-3 py-1.5 rounded-lg shadow-[0_0_15px_rgba(223,255,0,0.2)]"
                 >
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  VERIFIED ON-CHAIN ✓
+                  <CheckCircle2 className="w-4 h-4 text-[#dfff00]" />
+                  RECEIPT VERIFIED ✓
                 </motion.div>
               )}
 
@@ -301,9 +294,9 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  className="flex items-center gap-1.5 text-rose-300 font-bold text-xs bg-[#250d19]/90 border border-rose-500/50 px-3 py-1.5 rounded-lg shadow-[0_0_15px_rgba(251,79,99,0.3)]"
+                  className="flex items-center gap-1.5 text-white font-bold text-xs bg-black border border-[#dfff00] px-3 py-1.5 rounded-lg shadow-[0_0_15px_rgba(223,255,0,0.25)] animate-pulse"
                 >
-                  <AlertTriangle className="w-4 h-4 text-rose-400" />
+                  <AlertTriangle className="w-4 h-4 text-[#dfff00]" />
                   HASH MISMATCH ⚠
                 </motion.div>
               )}
@@ -314,7 +307,7 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
                 href={txExplorerUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:text-cyan-200 underline"
+                className="inline-flex items-center gap-1 text-[11px] text-[#dfff00] hover:underline"
               >
                 Explorer <ExternalLink className="w-3 h-3" />
               </a>
@@ -327,4 +320,3 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
     </Card>
   )
 }
-

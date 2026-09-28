@@ -17,58 +17,58 @@ export interface VerixiaLandingPageProps {
 
 export const VerixiaLandingPage: React.FC<VerixiaLandingPageProps> = ({ onOpenCommandCenter }) => {
   return (
-    <div className="min-h-screen bg-[#080a16] text-[#f1f2ff] flex flex-col font-sans selection:bg-cyan-500 selection:text-black overflow-x-hidden">
+    <div className="min-h-screen bg-black text-white flex flex-col font-sans selection:bg-[#dfff00] selection:text-black overflow-x-hidden">
       
       {/* 1. NAV */}
       <LandingNav onOpenCommandCenter={onOpenCommandCenter} />
 
-      {/* 2. HERO + SPLINE 3D (Midnight Blue #080A16) */}
-      <div className="bg-[#080a16]">
+      {/* 2. HERO + SPLINE 3D (Pure Black) */}
+      <div className="bg-black">
         <HeroSection onOpenCommandCenter={onOpenCommandCenter} />
       </div>
 
-      {/* 3. TRUST BAND (Deep Indigo #0A0D1D) */}
-      <div className="bg-[#0a0d1d] border-y border-[#1f264d]/60">
+      {/* 3. TRUST BAND (Soft Black #050505) */}
+      <div className="bg-[#050505] border-y border-white/12">
         <TrustBand />
       </div>
 
-      {/* 4. PROBLEM SECTION (Navy-Violet #0C1024) */}
-      <div className="bg-[#0c1024]">
+      {/* 4. PROBLEM SECTION (Black) */}
+      <div className="bg-black">
         <ProblemSection />
       </div>
 
-      {/* 5. THREE TRUST-LAYER MECHANISMS (Deep Blue #081024) */}
-      <div className="bg-[#081024]">
+      {/* 5. THREE TRUST-LAYER MECHANISMS (Soft Black #050505) */}
+      <div className="bg-[#050505]">
         <ThreeMechanismsSection />
       </div>
 
-      {/* 6. HOW IT WORKS (Indigo #10132B) */}
-      <div className="bg-[#10132b]">
+      {/* 6. HOW IT WORKS (Black) */}
+      <div className="bg-black">
         <HowItWorksSection />
       </div>
 
-      {/* 7. SECURITY PRINCIPLE (Midnight Blue #080A16) */}
-      <div className="bg-[#080a16]">
+      {/* 7. SECURITY PRINCIPLE (Soft Black #050505) */}
+      <div className="bg-[#050505]">
         <SecuritySection />
       </div>
 
-      {/* 8. TRY TO BREAK IT (ATTACK DEMO TEASER) (Deep Indigo #0A0D1D) */}
-      <div className="bg-[#0a0d1d]">
+      {/* 8. TRY TO BREAK IT (ATTACK DEMO TEASER) (Black) */}
+      <div className="bg-black">
         <AttackDemoSection onOpenCommandCenter={onOpenCommandCenter} />
       </div>
 
-      {/* 9. ILLUSTRATIVE TRANSACTION CONSOLE (Navy-Violet #0C1024) */}
-      <div className="bg-[#0c1024]">
+      {/* 9. ILLUSTRATIVE TRANSACTION CONSOLE (Soft Black #050505) */}
+      <div className="bg-[#050505]">
         <TransactionConsoleSection />
       </div>
 
-      {/* 10. FINAL CTA (Deep Blue #081024) */}
-      <div className="bg-[#081024]">
+      {/* 10. FINAL CTA (Black) */}
+      <div className="bg-black">
         <FinalCTASection onOpenCommandCenter={onOpenCommandCenter} />
       </div>
 
-      {/* 11. FOOTER (Midnight Dark #060812) */}
-      <div className="bg-[#060812]">
+      {/* 11. FOOTER (Soft Black #050505) */}
+      <div className="bg-[#050505]">
         <LandingFooter onOpenCommandCenter={onOpenCommandCenter} />
       </div>
 

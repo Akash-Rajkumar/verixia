@@ -11,32 +11,32 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({ onOpenCommandC
   return (
     <section className="w-full py-16 lg:py-24 px-4 max-w-5xl mx-auto text-center">
       
-      <Card variant="glow-cyan" className="p-8 lg:p-12 bg-slate-950/95 border-cyan-500/40 shadow-[0_0_40px_rgba(6,182,212,0.2)] space-y-6">
+      <Card className="p-8 lg:p-12 bg-black border border-white/15 shadow-2xl space-y-6 rounded-2xl">
         
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white font-sans tracking-tight leading-tight">
           GIVE AUTONOMOUS AGENTS RULES THEY CANNOT NEGOTIATE.
         </h2>
 
-        <p className="text-base sm:text-lg text-slate-300 font-sans max-w-2xl mx-auto">
+        <p className="text-base sm:text-lg text-white/70 font-sans max-w-2xl mx-auto">
           Verixia puts programmable financial boundaries beneath the intelligence layer.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
           <Button
-            variant="danger"
+            variant="primary"
             size="lg"
             onClick={onOpenCommandCenter}
-            className="font-mono text-sm font-bold uppercase tracking-wider gap-2.5 px-8 py-4 shadow-[0_0_25px_rgba(239,68,68,0.4)]"
+            className="font-mono text-sm font-bold uppercase tracking-wider gap-2.5 px-8 py-4 bg-black text-white hover:bg-[#dfff00] hover:text-black border border-[#dfff00]/80 shadow-[0_0_30px_rgba(223,255,0,0.3)] transition-all duration-300"
           >
-            <Play className="w-4 h-4 fill-current text-white" />
+            <Play className="w-4 h-4 fill-current text-[#dfff00] group-hover:text-black" />
             ENTER COMMAND CENTER
           </Button>
 
           <a
             href="#how-it-works"
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg border border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-slate-200 text-sm font-mono transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-white/20 bg-black hover:bg-white/10 text-white text-sm font-mono transition-all shadow-sm"
           >
-            <Terminal className="w-4 h-4 text-cyan-400" />
+            <Terminal className="w-4 h-4 text-[#dfff00]" />
             VIEW HOW IT WORKS
           </a>
         </div>

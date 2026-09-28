@@ -210,11 +210,11 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#080a16] text-[#f1f2ff] flex flex-col items-center justify-center p-6 space-y-4">
-        <div className="w-12 h-12 rounded-xl bg-[#0a1b35] border border-cyan-500/50 flex items-center justify-center animate-spin shadow-[0_0_20px_rgba(34,211,238,0.3)]">
-          <ShieldCheck className="w-6 h-6 text-cyan-400" />
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 space-y-4">
+        <div className="w-12 h-12 rounded-xl bg-black border border-[#dfff00]/60 flex items-center justify-center animate-spin shadow-[0_0_20px_rgba(223,255,0,0.3)]">
+          <ShieldCheck className="w-6 h-6 text-[#dfff00]" />
         </div>
-        <p className="font-mono text-sm tracking-wider text-cyan-400 animate-pulse">
+        <p className="font-mono text-sm tracking-wider text-[#dfff00] animate-pulse">
           BOOTING VERIXIA ENFORCEMENT COMMAND CENTER...
         </p>
       </div>
@@ -223,8 +223,8 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
 
   return (
     <div
-      className={`min-h-screen bg-[#080a16] text-[#f1f2ff] flex flex-col font-sans selection:bg-cyan-500 selection:text-black transition-all ${
-        isPresentationMode ? "p-2 lg:p-4 bg-[#080a16]" : ""
+      className={`min-h-screen bg-black text-white flex flex-col font-sans selection:bg-[#dfff00] selection:text-black transition-all ${
+        isPresentationMode ? "p-2 lg:p-4 bg-black" : ""
       }`}
     >
       

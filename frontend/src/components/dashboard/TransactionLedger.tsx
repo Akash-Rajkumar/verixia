@@ -2,7 +2,6 @@ import React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   ShieldAlert,
-  ShieldCheck,
   ListFilter,
   AlertTriangle,
   Clock,
@@ -10,6 +9,7 @@ import {
   RefreshCw,
   AlertCircle,
   HelpCircle,
+  CheckCircle2,
 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -36,30 +36,30 @@ export const TransactionLedger: React.FC<TransactionLedgerProps> = ({
   onRetry,
 }) => {
   return (
-    <Card className="w-full bg-[#0c1024]/90 border-indigo-900/40 shadow-2xl flex flex-col h-[520px] overflow-hidden">
+    <Card className="w-full bg-black border-white/15 shadow-2xl flex flex-col h-[520px] overflow-hidden rounded-2xl">
       
       {/* Header */}
-      <div className="px-5 py-3.5 bg-[#0e122b]/90 border-b border-indigo-900/40 flex items-center justify-between">
+      <div className="px-5 py-3.5 bg-[#0a0a0a] border-b border-white/12 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <ListFilter className="w-4 h-4 text-cyan-400" />
-          <h3 className="text-sm font-bold font-mono tracking-wider text-[#f1f2ff] uppercase">
+          <ListFilter className="w-4 h-4 text-[#dfff00]" />
+          <h3 className="text-sm font-bold font-mono tracking-wider text-white uppercase">
             Transaction Ledger
           </h3>
           <Badge variant="cyan" className="text-[10px] py-0 px-1.5 gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#dfff00] animate-pulse" />
             LIVE
           </Badge>
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs font-mono text-[#c4c7dc]">
+          <span className="text-xs font-mono text-white/70">
             {transactions.length} Attempt{transactions.length === 1 ? "" : "s"}
           </span>
         </div>
       </div>
 
       {/* Main List Container */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-[#080a16]">
+      <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-black scrollbar-thin scrollbar-thumb-white/20">
         
         {/* Loading Skeletons */}
         {isLoading ? (
@@ -67,19 +67,19 @@ export const TransactionLedger: React.FC<TransactionLedgerProps> = ({
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="h-16 rounded-xl bg-[#0f1430]/60 border border-indigo-900/30 animate-pulse"
+                className="h-16 rounded-xl bg-[#0a0a0a] border border-white/12 animate-pulse"
               />
             ))}
           </div>
         ) : error ? (
           /* Error State */
           <div className="h-full flex flex-col items-center justify-center p-6 text-center space-y-3">
-            <AlertCircle className="w-8 h-8 text-rose-400" />
+            <AlertCircle className="w-8 h-8 text-[#dfff00]" />
             <div className="space-y-1">
-              <h4 className="text-xs font-mono font-bold text-rose-300 uppercase">
+              <h4 className="text-xs font-mono font-bold text-[#dfff00] uppercase">
                 Failed to load transaction ledger
               </h4>
-              <p className="text-xs text-[#c4c7dc] max-w-sm">{error}</p>
+              <p className="text-xs text-white/70 max-w-sm">{error}</p>
             </div>
             {onRetry && (
               <Button variant="secondary" size="sm" onClick={onRetry} className="text-xs font-mono gap-1">
@@ -89,10 +89,10 @@ export const TransactionLedger: React.FC<TransactionLedgerProps> = ({
           </div>
         ) : transactions.length === 0 ? (
           /* Empty State */
-          <div className="h-full flex flex-col items-center justify-center p-6 text-center space-y-2 text-[#858aa6] font-mono">
-            <HelpCircle className="w-8 h-8 text-[#7c86b8]" />
+          <div className="h-full flex flex-col items-center justify-center p-6 text-center space-y-2 text-white/60 font-mono">
+            <HelpCircle className="w-8 h-8 text-white/40" />
             <p className="text-xs">No transaction attempts recorded yet.</p>
-            <p className="text-[11px] text-[#858aa6]">
+            <p className="text-[11px] text-white/50">
               Trigger an attack or legitimate offer in Demo Controls above to see real-time ledger entries.
             </p>
           </div>
@@ -115,16 +115,8 @@ export const TransactionLedger: React.FC<TransactionLedgerProps> = ({
                   onClick={() => onSelectAttempt(attempt)}
                   className={`group relative rounded-xl p-3.5 border transition-all cursor-pointer select-none ${
                     isSelected
-                      ? isBlocked
-                        ? "bg-[#250d19]/90 border-rose-500/80 shadow-[0_0_15px_rgba(251,79,99,0.25)]"
-                        : isExecuted
-                        ? "bg-[#092723]/90 border-emerald-500/80 shadow-[0_0_15px_rgba(52,211,153,0.25)]"
-                        : "bg-[#0d1330] border-cyan-500/60 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
-                      : isBlocked
-                      ? "bg-[#140b15]/80 hover:bg-[#1a0e1c] border-rose-900/30 hover:border-rose-500/40"
-                      : isExecuted
-                      ? "bg-[#091816]/80 hover:bg-[#0c201d] border-emerald-900/30 hover:border-emerald-500/40"
-                      : "bg-[#0f1430]/80 hover:bg-[#13193c] border-indigo-900/30 hover:border-indigo-700/50"
+                      ? "bg-black border-[#dfff00] shadow-[0_0_20px_rgba(223,255,0,0.14)]"
+                      : "bg-[#050505] hover:bg-[#0a0a0a] border-white/12 hover:border-white/30"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-3">
@@ -136,17 +128,17 @@ export const TransactionLedger: React.FC<TransactionLedgerProps> = ({
                       <div
                         className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 mt-0.5 ${
                           isBlocked
-                            ? "bg-[#30101e] border-rose-500/50 text-rose-400 shadow-[0_0_10px_rgba(251,79,99,0.2)]"
+                            ? "bg-black border-[#dfff00]/70 text-[#dfff00] shadow-[0_0_10px_rgba(223,255,0,0.2)]"
                             : isExecuted
-                            ? "bg-[#0a2f26] border-emerald-500/50 text-emerald-400"
+                            ? "bg-black border-white/50 text-white shadow-[0_0_10px_rgba(255,255,255,0.1)]"
                             : isDeclined
-                            ? "bg-[#2e200a] border-amber-500/50 text-amber-400"
-                            : "bg-[#101535] border-indigo-900/50 text-[#7c86b8]"
+                            ? "bg-black border-white/30 text-white/80"
+                            : "bg-black border-white/15 text-white/50"
                         }`}
                       >
-                        {isBlocked && <ShieldAlert className="w-5 h-5" />}
-                        {isExecuted && <ShieldCheck className="w-5 h-5" />}
-                        {isDeclined && <AlertTriangle className="w-5 h-5" />}
+                        {isBlocked && <ShieldAlert className="w-5 h-5 text-[#dfff00]" />}
+                        {isExecuted && <CheckCircle2 className="w-5 h-5 text-white" />}
+                        {isDeclined && <AlertTriangle className="w-5 h-5 text-white/80" />}
                         {!isBlocked && !isExecuted && !isDeclined && <Clock className="w-5 h-5" />}
                       </div>
 
@@ -155,29 +147,29 @@ export const TransactionLedger: React.FC<TransactionLedgerProps> = ({
                         
                         {/* Line 1: Attempt ID & Amount */}
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-mono text-xs font-bold text-[#f1f2ff]">
+                          <span className="font-mono text-xs font-bold text-white">
                             {attempt.id}
                           </span>
-                          <span className="text-xs font-mono font-bold text-cyan-300">
+                          <span className="text-xs font-mono font-bold text-[#dfff00]">
                             {formatNativeAmount(attempt.amountWei, 18, "MST")}
                           </span>
                           
                           {/* Attack badge if present */}
                           {attempt.attackType && (
-                            <Badge variant="red" className="text-[9px] py-0 px-1">
+                            <Badge variant="cyan" className="text-[9px] py-0 px-1">
                               {ATTACK_TYPE_HUMAN_LABELS[attempt.attackType] || attempt.attackType}
                             </Badge>
                           )}
                         </div>
 
                         {/* Line 2: Counterparty */}
-                        <p className="text-xs text-[#c4c7dc] font-mono truncate">
+                        <p className="text-xs text-white/70 font-mono truncate">
                           To: {truncateAddress(attempt.counterpartyAddress, 6, 4)}
                         </p>
 
                         {/* Line 3: Exact Reason Code & Sentence for Blocked */}
                         {isBlocked && (
-                          <div className="mt-1 pt-1 border-t border-rose-900/40 text-[11px] font-mono text-rose-300">
+                          <div className="mt-1 pt-1 border-t border-white/10 text-[11px] font-mono text-[#dfff00]">
                             <span className="font-bold">
                               #{attempt.blockReasonCode} {REASON_CODE_LABELS[attempt.blockReasonCode || 0]}:
                             </span>{" "}
@@ -189,7 +181,7 @@ export const TransactionLedger: React.FC<TransactionLedgerProps> = ({
 
                         {/* Line 3 for Declined */}
                         {isDeclined && (
-                          <p className="text-[11px] font-mono text-amber-300">
+                          <p className="text-[11px] font-mono text-white/80">
                             Declined by Good Agent reasoner.
                           </p>
                         )}
@@ -220,7 +212,7 @@ export const TransactionLedger: React.FC<TransactionLedgerProps> = ({
                         </Badge>
                       )}
 
-                      <ChevronRight className="w-4 h-4 text-[#7c86b8] group-hover:text-cyan-400 transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-white/50 group-hover:text-[#dfff00] transition-colors" />
                     </div>
 
                   </div>

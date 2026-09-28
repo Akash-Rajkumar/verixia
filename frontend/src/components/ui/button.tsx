@@ -26,20 +26,20 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || isLoading}
         className={clsx(
-          "inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:opacity-50 disabled:cursor-not-allowed select-none",
-          size === "sm" && "px-3 py-1.5 text-xs font-mono",
-          size === "md" && "px-4 py-2 text-sm",
-          size === "lg" && "px-6 py-3 text-base font-semibold",
+          "inline-flex items-center justify-center font-mono font-bold rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black disabled:opacity-50 disabled:cursor-not-allowed select-none active:scale-[0.98]",
+          size === "sm" && "px-3.5 py-2 text-xs",
+          size === "md" && "px-4.5 py-2.5 text-sm",
+          size === "lg" && "px-6 py-3.5 text-base tracking-wider uppercase",
           variant === "primary" &&
-            "bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] focus:ring-cyan-500 border border-cyan-400/30",
+            "bg-black text-white hover:bg-[#dfff00] hover:text-black border border-[#dfff00]/60 shadow-[0_0_20px_rgba(223,255,0,0.15)] focus:ring-[#dfff00]",
           variant === "secondary" &&
-            "bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 focus:ring-slate-500",
+            "bg-black/80 text-white hover:bg-white/10 border border-white/20 focus:ring-white",
           variant === "danger" &&
-            "bg-red-600/90 hover:bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.4)] focus:ring-red-500 border border-red-400/30",
+            "bg-black text-[#dfff00] hover:bg-[#dfff00] hover:text-black border border-[#dfff00]/80 shadow-[0_0_24px_rgba(223,255,0,0.25)] focus:ring-[#dfff00]",
           variant === "amber" &&
-            "bg-amber-600 hover:bg-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.3)] focus:ring-amber-500 border border-amber-400/30",
+            "bg-black text-white hover:bg-white/15 border border-white/30 focus:ring-white",
           variant === "ghost" &&
-            "bg-transparent hover:bg-slate-800/60 text-slate-400 hover:text-white border border-transparent",
+            "bg-transparent hover:bg-white/10 text-white/70 hover:text-white border border-transparent",
           className
         )}
         {...props}
@@ -59,14 +59,14 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 r="10"
                 stroke="currentColor"
                 strokeWidth="4"
-              ></circle>
+              />
               <path
                 className="opacity-75"
                 fill="currentColor"
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
+              />
             </svg>
-            Processing...
+            <span>PROCESSING...</span>
           </span>
         ) : (
           children

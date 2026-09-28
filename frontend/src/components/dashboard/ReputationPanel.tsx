@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react"
-import { motion } from "framer-motion"
 import {
   RadarChart,
   PolarGrid,
@@ -17,7 +16,7 @@ import {
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { formatNativeAmount, truncateAddress, truncateHash } from "@/lib/format"
+import { formatNativeAmount, truncateAddress } from "@/lib/format"
 import { api } from "@/api"
 import type { FeedbackEvent, PublicConfig, Reputation, TransactionAttempt } from "@/api/types"
 
@@ -105,24 +104,24 @@ export const ReputationPanel: React.FC<ReputationPanelProps> = ({
     : []
 
   return (
-    <Card className="w-full bg-[#0f1430]/90 border-indigo-900/40 shadow-2xl p-5 flex flex-col h-[520px] overflow-hidden">
+    <Card className="w-full bg-black border-white/15 shadow-2xl p-5 flex flex-col h-[520px] overflow-hidden rounded-2xl">
       
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-indigo-900/40 pb-3 mb-4">
+      <div className="flex items-center justify-between border-b border-white/12 pb-3 mb-4">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-[#1d163e]/90 border border-violet-500/50 flex items-center justify-center shadow-[0_0_18px_rgba(124,108,245,0.3)]">
-            <Award className="w-5 h-5 text-violet-400" />
+          <div className="w-9 h-9 rounded-xl bg-black border border-[#dfff00]/60 flex items-center justify-center shadow-[0_0_18px_rgba(223,255,0,0.2)]">
+            <Award className="w-5 h-5 text-[#dfff00]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold font-mono text-[#f1f2ff] uppercase tracking-wider">
+              <h3 className="text-sm font-bold font-mono text-white uppercase tracking-wider">
                 Reputation Registry
               </h3>
-              <Badge variant="violet" className="text-[10px] py-0 px-1.5">
+              <Badge variant="cyan" className="text-[10px] py-0 px-1.5">
                 MULTI-AXIS SIGNALS
               </Badge>
             </div>
-            <p className="text-[11px] text-[#c4c7dc]">
+            <p className="text-[11px] text-white/60">
               On-chain non-aggregate agent competence & compliance metrics
             </p>
           </div>
@@ -131,168 +130,148 @@ export const ReputationPanel: React.FC<ReputationPanelProps> = ({
         {/* Address badge */}
         <div className="flex items-center gap-2 font-mono text-xs">
           <Badge variant="neutral" className="gap-1">
-            <Database className="w-3 h-3 text-cyan-400" />
+            <Database className="w-3 h-3 text-[#dfff00]" />
             {truncateAddress(targetAddress, 6, 4)}
           </Badge>
         </div>
       </div>
 
       {/* Main Body */}
-      <div className="flex-1 overflow-y-auto space-y-5 pr-1">
+      <div className="flex-1 overflow-y-auto space-y-5 pr-1 scrollbar-thin scrollbar-thumb-white/20">
         
         {/* Radar Chart & Axis Metrics Split View */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center bg-[#0a0d24]/80 p-4 border border-indigo-900/40 rounded-xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center bg-[#0a0a0a] p-4 border border-white/12 rounded-xl">
           
           {/* Radar Chart Visual */}
           <div className="h-56 w-full flex items-center justify-center relative">
             {isLoading ? (
-              <div className="text-xs font-mono text-[#7c86b8] animate-pulse">
+              <div className="text-xs font-mono text-white/50 animate-pulse">
                 Loading reputation signals...
               </div>
             ) : !hasAxes ? (
               /* REQUIRED: NO FEEDBACK YET STATE */
               <div className="flex flex-col items-center justify-center text-center p-4 space-y-2">
-                <HelpCircle className="w-8 h-8 text-[#7c86b8]" />
-                <span className="text-xs font-mono font-bold text-amber-300 uppercase tracking-wider">
+                <HelpCircle className="w-8 h-8 text-white/40" />
+                <span className="text-xs font-mono font-bold text-[#dfff00] uppercase tracking-wider">
                   NO FEEDBACK YET
                 </span>
-                <p className="text-[11px] font-sans text-[#c4c7dc] max-w-xs">
+                <p className="text-[11px] font-sans text-white/70 max-w-xs">
                   No verified on-chain feedback events exist for this address. Axes remain unrated until stake-backed ratings are recorded.
                 </p>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
-                  <PolarGrid stroke="#22284c" />
-                  <PolarAngleAxis dataKey="axis" stroke="#c4c7dc" tick={{ fill: "#c4c7dc", fontSize: 11 }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#3b447a" tick={false} />
+                  <PolarGrid stroke="#333333" />
+                  <PolarAngleAxis dataKey="axis" stroke="#ffffff" tick={{ fill: "#ffffff", fontSize: 11 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#444444" tick={false} />
                   <Radar
                     name="Reputation"
                     dataKey="value"
-                    stroke="#22d3ee"
-                    fill="#7c6cf5"
-                    fillOpacity={0.4}
+                    stroke="#dfff00"
+                    fill="#ffffff"
+                    fillOpacity={0.25}
                   />
                 </RadarChart>
               </ResponsiveContainer>
             )}
           </div>
 
-          {/* 4 Independent Axes Breakdown (NO AGGREGATE DISPLAY) */}
-          <div className="space-y-2.5 font-mono text-xs">
-            <span className="text-[10px] text-[#858aa6] uppercase tracking-wider block border-b border-indigo-900/40 pb-1">
-              Independent Axis Ratings (0-100)
+          {/* 4 Independent Axes Grid */}
+          <div className="space-y-2.5 font-mono">
+            <span className="text-[10px] text-white/50 uppercase tracking-wider block">
+              Independent Axis Ratings
             </span>
 
-            {[
-              { label: "Competence", val: reputation?.axes?.competence, color: "text-cyan-300", bg: "bg-cyan-500" },
-              { label: "Honesty", val: reputation?.axes?.honesty, color: "text-emerald-300", bg: "bg-emerald-500" },
-              { label: "Compliance", val: reputation?.axes?.compliance, color: "text-violet-300", bg: "bg-violet-500" },
-              { label: "Reliability", val: reputation?.axes?.reliability, color: "text-amber-300", bg: "bg-amber-500" },
-            ].map((axis) => (
-              <div key={axis.label} className="space-y-1">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-[#f1f2ff]">{axis.label}</span>
-                  <span className={`font-bold ${axis.color}`}>
-                    {axis.val !== null && axis.val !== undefined ? `${axis.val} / 100` : "NO DATA"}
-                  </span>
-                </div>
-                <div className="w-full h-1.5 bg-[#080a16] rounded-full overflow-hidden border border-indigo-900/40">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${axis.val || 0}%` }}
-                    transition={{ duration: 0.5 }}
-                    className={`h-full ${axis.bg}`}
-                  />
-                </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="p-2.5 bg-black border border-white/12 rounded-lg">
+                <span className="text-[10px] text-white/60 block">COMPETENCE</span>
+                <span className="text-sm font-bold text-[#dfff00]">
+                  {reputation?.axes?.competence ?? "N/A"}
+                </span>
               </div>
-            ))}
 
-            <div className="pt-2 flex items-center justify-between text-[10px] text-[#858aa6]">
-              <span>Feedback Count: {reputation?.feedbackCount || 0}</span>
-              <span>Source: {reputation?.source || "chain"}</span>
+              <div className="p-2.5 bg-black border border-white/12 rounded-lg">
+                <span className="text-[10px] text-white/60 block">HONESTY</span>
+                <span className="text-sm font-bold text-white">
+                  {reputation?.axes?.honesty ?? "N/A"}
+                </span>
+              </div>
+
+              <div className="p-2.5 bg-black border border-white/12 rounded-lg">
+                <span className="text-[10px] text-white/60 block">COMPLIANCE</span>
+                <span className="text-sm font-bold text-white">
+                  {reputation?.axes?.compliance ?? "N/A"}
+                </span>
+              </div>
+
+              <div className="p-2.5 bg-black border border-white/12 rounded-lg">
+                <span className="text-[10px] text-white/60 block">RELIABILITY</span>
+                <span className="text-sm font-bold text-[#dfff00]">
+                  {reputation?.axes?.reliability ?? "N/A"}
+                </span>
+              </div>
+            </div>
+
+            <div className="text-[10px] text-white/50 pt-1">
+              Feedback Count: {reputation?.feedbackCount || 0} event(s)
             </div>
           </div>
 
         </div>
 
-        {/* STAKE + SLASH FEEDBACK SECTION (CONDITIONAL ON config.features.stakeSlash === true) */}
-        {config?.features.stakeSlash !== false && (
-          <div className="space-y-3 font-mono">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#f1f2ff] uppercase tracking-wider flex items-center gap-1.5">
-                <Gavel className="w-3.5 h-3.5 text-amber-400" />
-                Stake & Slash Feedback Events
-              </span>
-              <Badge variant="amber" className="text-[9px] py-0">
-                STAKE-BACKED RATINGS
-              </Badge>
+        {/* Feedback History & Dispute Actions */}
+        <div className="space-y-2 font-mono text-xs">
+          <span className="text-[10px] text-white/50 uppercase tracking-wider block">
+            Stake & Slash Feedback Log
+          </span>
+
+          {feedbackEvents.length === 0 ? (
+            <div className="p-3 bg-[#0a0a0a] border border-white/12 rounded-xl text-center text-[11px] text-white/50">
+              No stake/slash feedback events recorded for this counterparty.
             </div>
-
-            {feedbackEvents.length === 0 ? (
-              <div className="p-3 bg-[#0a0d24]/40 border border-indigo-900/40 rounded-lg text-center text-xs text-[#858aa6]">
-                No active feedback events recorded for this address.
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {feedbackEvents.map((fb) => (
-                  <div
-                    key={fb.id}
-                    className="p-3 rounded-lg bg-[#0a0d24]/80 border border-indigo-900/40 flex items-center justify-between text-xs gap-3"
-                  >
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-[#f1f2ff]">
-                          Event #{fb.feedbackId}
-                        </span>
-                        <span className="text-[11px] text-cyan-300">
-                          Stake: {formatNativeAmount(fb.stakeWei, 18, "MST")}
-                        </span>
-                      </div>
-                      <div className="text-[10px] text-[#858aa6]">
-                        Author: {truncateAddress(fb.authorAddress, 6, 4)} | Tx: {truncateHash(fb.txHash, 6, 4)}
-                      </div>
-                    </div>
-
+          ) : (
+            <div className="space-y-2">
+              {feedbackEvents.map((fb) => (
+                <div
+                  key={fb.feedbackId}
+                  className="p-3 bg-[#0a0a0a] border border-white/12 rounded-xl flex items-center justify-between gap-3 text-[11px]"
+                >
+                  <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Badge
-                        variant={
-                          fb.status === "active"
-                            ? "emerald"
-                            : fb.status === "disputed"
-                            ? "amber"
-                            : fb.status === "slashed"
-                            ? "red"
-                            : "neutral"
-                        }
-                        className="text-[10px] uppercase font-bold"
-                      >
-                        {fb.status}
+                      <span className="font-bold text-white">
+                        From: {truncateAddress(fb.authorAddress, 6, 4)}
+                      </span>
+                      <Badge variant="cyan" className="text-[9px] py-0">
+                        {fb.status.toUpperCase()}
                       </Badge>
-
-                      {/* Dispute Button: ONLY when status is active */}
-                      {fb.status === "active" && (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          isLoading={disputingId === fb.feedbackId}
-                          onClick={() => handleDispute(fb.feedbackId)}
-                          className="text-[10px] font-mono py-0.5 px-2 bg-[#2a1a0c]/80 border-amber-500/40 text-amber-300 hover:bg-[#35200e]"
-                        >
-                          Dispute
-                        </Button>
-                      )}
+                    </div>
+                    <p className="text-white/70 font-sans text-xs">
+                      {fb.evidenceHash ? `Evidence Hash: ${fb.evidenceHash}` : "Verified on-chain feedback signal"}
+                    </p>
+                    <div className="text-[10px] text-white/50">
+                      Stake: {formatNativeAmount(fb.stakeWei, 18, "MST")}
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+
+                  {fb.status === "active" && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      isLoading={disputingId === fb.feedbackId}
+                      onClick={() => handleDispute(fb.feedbackId)}
+                      className="text-[10px] py-1 px-2.5 gap-1 border-white/30 text-white hover:border-[#dfff00] hover:text-[#dfff00]"
+                    >
+                      <Gavel className="w-3 h-3" /> Dispute
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
       </div>
-
     </Card>
   )
 }
-

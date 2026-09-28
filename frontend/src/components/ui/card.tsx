@@ -11,13 +11,13 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={clsx(
-          "rounded-xl transition-all duration-200 border backdrop-blur-xl",
-          variant === "default" && "bg-[#0c1024]/85 border-indigo-900/30 shadow-[0_4px_24px_rgba(8,10,22,0.6)]",
-          variant === "glow-cyan" && "bg-[#0a172c]/85 border-cyan-500/35 shadow-[0_0_25px_rgba(34,211,238,0.12)]",
-          variant === "glow-red" && "bg-[#250d19]/85 border-rose-500/40 shadow-[0_0_25px_rgba(251,79,99,0.15)]",
-          variant === "glow-violet" && "bg-[#1d163e]/85 border-violet-500/35 shadow-[0_0_25px_rgba(124,108,245,0.15)]",
-          variant === "glow-emerald" && "bg-[#092723]/85 border-emerald-500/35 shadow-[0_0_25px_rgba(52,211,153,0.12)]",
-          variant === "outline" && "bg-transparent border-indigo-900/40",
+          "rounded-2xl transition-all duration-300 border backdrop-blur-2xl",
+          variant === "default" && "bg-[#0a0a0a]/90 border-white/12 shadow-[0_10px_40px_rgba(0,0,0,0.8)]",
+          variant === "glow-cyan" && "bg-[#0f0f0f]/95 border-[#dfff00]/50 shadow-[0_0_30px_rgba(223,255,0,0.10)]",
+          variant === "glow-red" && "bg-[#141208]/95 border-[#dfff00]/60 shadow-[0_0_30px_rgba(223,255,0,0.14)]",
+          variant === "glow-violet" && "bg-[#0d0d0d]/90 border-white/20 shadow-[0_0_24px_rgba(255,255,255,0.06)]",
+          variant === "glow-emerald" && "bg-[#0a0a0a]/95 border-white/30 shadow-[0_0_24px_rgba(255,255,255,0.08)]",
+          variant === "outline" && "bg-transparent border-white/15",
           className
         )}
         {...props}
@@ -29,4 +29,3 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
 )
 
 Card.displayName = "Card"
-

@@ -2,107 +2,100 @@
 
 @layer base {
   :root {
-    --verixia-bg-dark: #080a16;
-    --verixia-surface-base: rgba(16, 20, 42, 0.82);
-    --verixia-surface-blue: rgba(16, 27, 58, 0.82);
-    --verixia-surface-violet: rgba(29, 22, 62, 0.80);
-    --verixia-surface-burgundy: rgba(37, 13, 25, 0.85);
-    --verixia-surface-emerald: rgba(9, 39, 35, 0.85);
-    
-    --verixia-cyan: #22d3ee;
-    --verixia-violet: #7c6cf5;
-    --verixia-indigo: #6366f1;
-    --verixia-magenta: #d946ef;
-    --verixia-crimson: #fb4f63;
-    --verixia-emerald: #34d399;
-    --verixia-amber: #fbbf24;
-    
-    --verixia-text-primary: #f1f2ff;
-    --verixia-text-secondary: #c4c7dc;
-    --verixia-text-muted: #858aa6;
-    --verixia-text-technical: #7c86b8;
+    --verixia-black: #000000;
+    --verixia-black-soft: #050505;
+    --verixia-black-surface: #0a0a0a;
+    --verixia-black-panel: #101010;
+
+    --verixia-white: #ffffff;
+    --verixia-white-soft: #f5f5f5;
+    --verixia-white-muted: #cfcfcf;
+    --verixia-white-dim: #8e8e8e;
+
+    --verixia-yellow: #dfff00;
+
+    --verixia-border: rgba(255, 255, 255, 0.12);
+    --verixia-border-strong: rgba(255, 255, 255, 0.25);
+    --verixia-glow: rgba(223, 255, 0, 0.15);
   }
 
   body {
-    background-color: #080a16;
+    background-color: #000000;
     background-image: 
-      radial-gradient(at 0% 0%, rgba(124, 108, 245, 0.12) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(34, 211, 238, 0.12) 0px, transparent 50%),
-      radial-gradient(at 50% 100%, rgba(99, 102, 241, 0.10) 0px, transparent 50%),
-      radial-gradient(at 80% 50%, rgba(217, 70, 239, 0.08) 0px, transparent 50%);
+      radial-gradient(at 20% 20%, rgba(223, 255, 0, 0.03) 0px, transparent 50%),
+      radial-gradient(at 80% 30%, rgba(255, 255, 255, 0.02) 0px, transparent 40%),
+      radial-gradient(at 50% 80%, rgba(223, 255, 0, 0.025) 0px, transparent 50%),
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
     background-attachment: fixed;
-    color: #f1f2ff;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: #ffffff;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     overflow-x: hidden;
+    letter-spacing: -0.011em;
   }
 }
 
-/* Verixia Tinted Glass Panels */
+@media (prefers-reduced-motion: reduce) {
+  body {
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  }
+}
+
+/* Verixia Glass & Surface Utilities */
 .glass-verixia-base {
-  background: rgba(16, 20, 42, 0.82);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.glass-verixia-blue {
-  background: rgba(16, 27, 58, 0.82);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(34, 211, 238, 0.25);
-  box-shadow: 0 0 25px rgba(34, 211, 238, 0.08);
+.glass-verixia-panel {
+  background: rgba(16, 16, 16, 0.90);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.glass-verixia-violet {
-  background: rgba(29, 22, 62, 0.80);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(124, 108, 245, 0.3);
-  box-shadow: 0 0 25px rgba(124, 108, 245, 0.1);
+.glass-verixia-yellow {
+  background: rgba(18, 18, 18, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(223, 255, 0, 0.4);
+  box-shadow: 0 0 25px rgba(223, 255, 0, 0.08);
 }
 
-.glass-verixia-burgundy {
-  background: rgba(37, 13, 25, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(251, 79, 99, 0.35);
-  box-shadow: 0 0 25px rgba(251, 79, 99, 0.12);
+/* Neon Yellow Accent Helpers */
+.text-yellow-neon {
+  color: #dfff00;
 }
 
-.glass-verixia-emerald {
-  background: rgba(9, 39, 35, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(52, 211, 153, 0.3);
-  box-shadow: 0 0 25px rgba(52, 211, 153, 0.1);
+.border-yellow-neon {
+  border-color: #dfff00;
 }
 
-/* Gradient Text Utilities */
-.text-gradient-cyan-violet {
-  background: linear-gradient(135deg, #22d3ee 0%, #a78bfa 50%, #7c6cf5 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.bg-yellow-neon {
+  background-color: #dfff00;
 }
 
-.text-gradient-violet-magenta {
-  background: linear-gradient(135deg, #7c6cf5 0%, #d946ef 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.glow-yellow-neon {
+  box-shadow: 0 0 24px rgba(223, 255, 0, 0.16);
 }
 
-/* Custom Scrollbar */
+/* Custom Minimal Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #080a16;
+  background: #000000;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e264a;
-  border-radius: 3px;
+  background: #262626;
+  border-radius: 2.5px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #7c6cf5;
+  background: #dfff00;
 }
-

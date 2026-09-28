@@ -30,7 +30,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   onBackToLanding,
 }) => {
   return (
-    <header className="w-full bg-[#0a0d1d]/90 border-b border-indigo-900/40 backdrop-blur-xl px-4 lg:px-8 py-3.5 sticky top-0 z-40 shadow-[0_4px_20px_rgba(8,10,22,0.6)]">
+    <header className="w-full bg-black/85 border-b border-white/12 backdrop-blur-2xl px-4 lg:px-8 py-3.5 sticky top-0 z-40 shadow-[0_4px_30px_rgba(0,0,0,0.9)]">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         
         {/* LEFT: Branding & Live Metadata Badges */}
@@ -42,77 +42,77 @@ export const TopBar: React.FC<TopBarProps> = ({
               variant="ghost"
               size="sm"
               onClick={onBackToLanding}
-              className="text-xs font-mono gap-1 text-[#c4c7dc] hover:text-cyan-400 p-1.5 hover:bg-indigo-950/40"
+              className="text-xs font-mono gap-1 text-white/70 hover:text-[#dfff00] p-1.5 hover:bg-white/10"
               title="Return to Verixia Landing Page"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4 text-[#dfff00]" />
               <span className="hidden sm:inline">Landing</span>
             </Button>
           )}
 
           {/* Logo */}
           <div className="flex items-center gap-2.5 mr-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-950 via-indigo-950 to-violet-950 border border-cyan-500/50 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.25)] relative group">
-              <div className="absolute inset-0 rounded-xl bg-violet-500/20 blur-md group-hover:bg-cyan-500/30 transition-all" />
-              <ShieldCheck className="w-5.5 h-5.5 text-cyan-400 relative z-10" />
+            <div className="w-8 h-8 rounded-lg bg-black border border-[#dfff00]/60 flex items-center justify-center shadow-[0_0_15px_rgba(223,255,0,0.25)] relative group">
+              <div className="absolute inset-0 rounded-lg bg-[#dfff00]/10 blur-sm pointer-events-none" />
+              <ShieldCheck className="w-5 h-5 text-[#dfff00] relative z-10" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-lg tracking-wider text-[#f1f2ff] font-mono">
+                <span className="font-bold text-lg tracking-wider text-white font-mono">
                   VERIXIA
                 </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 shadow-[0_0_10px_rgba(34,211,238,0.2)]">
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#101010] text-[#dfff00] border border-[#dfff00]/40">
                   ENFORCEMENT LAYER
                 </span>
               </div>
-              <p className="text-[11px] text-[#c4c7dc] font-sans">
+              <p className="text-[11px] text-white/60 font-sans">
                 On-Chain Autonomous AI Agent Spending Safeguard
               </p>
             </div>
           </div>
 
-          <div className="h-6 w-px bg-indigo-900/40 hidden sm:block" />
+          <div className="h-6 w-px bg-white/12 hidden sm:block" />
 
           {/* Connection Status Badge */}
           <div className="flex items-center gap-1.5">
             {connectionMode === "realtime" && (
-              <Badge variant="emerald" className="gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <Badge variant="cyan" className="gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#dfff00] animate-pulse shadow-[0_0_8px_rgba(223,255,0,0.8)]" />
                 <Radio className="w-3 h-3" />
                 REALTIME
               </Badge>
             )}
             {connectionMode === "polling" && (
               <Badge variant="amber" className="gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-white/70 animate-pulse" />
                 <Radio className="w-3 h-3" />
                 POLLING
               </Badge>
             )}
             {connectionMode === "disconnected" && (
-              <Badge variant="red" className="gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-rose-500" />
+              <Badge variant="neutral" className="gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-white/30" />
                 DISCONNECTED
               </Badge>
             )}
           </div>
 
           {/* Chain Badge */}
-          <Badge variant="cyan" className="gap-1">
-            <Database className="w-3 h-3" />
+          <Badge variant="neutral" className="gap-1">
+            <Database className="w-3 h-3 text-[#dfff00]" />
             MST • CHAIN {config?.chainId || 1337}
           </Badge>
 
           {/* Model Provider Badge */}
-          <Badge variant="violet" className="gap-1">
-            <Cpu className="w-3 h-3" />
+          <Badge variant="neutral" className="gap-1">
+            <Cpu className="w-3 h-3 text-white/80" />
             {(config?.modelProvider || "GEMINI").toUpperCase()}
           </Badge>
 
           {/* Fell Back to Ollama Warning Badge */}
           {fellBackToOllama && (
-            <Badge variant="amber" className="gap-1 shadow-[0_0_12px_rgba(245,158,11,0.25)]">
-              <AlertTriangle className="w-3 h-3 text-amber-400" />
+            <Badge variant="cyan" className="gap-1">
+              <AlertTriangle className="w-3 h-3 text-[#dfff00]" />
               FELL BACK TO OLLAMA
             </Badge>
           )}
@@ -123,7 +123,7 @@ export const TopBar: React.FC<TopBarProps> = ({
               variant={isPresentationMode ? "primary" : "secondary"}
               size="sm"
               onClick={onTogglePresentationMode}
-              className="text-xs font-mono gap-1.5 py-1 px-2.5 ml-1 border-cyan-500/40"
+              className="text-xs font-mono gap-1.5 py-1 px-2.5 ml-1 border-white/20"
               title="Toggle Judge Presentation Mode (Press 'P')"
             >
               {isPresentationMode ? (
@@ -133,7 +133,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                 </>
               ) : (
                 <>
-                  <Maximize2 className="w-3.5 h-3.5 text-cyan-400" />
+                  <Maximize2 className="w-3.5 h-3.5 text-[#dfff00]" />
                   Presentation (P)
                 </>
               )}
@@ -142,14 +142,14 @@ export const TopBar: React.FC<TopBarProps> = ({
         </div>
 
         {/* RIGHT: GIANT LIVE SCOREBOARD */}
-        <div className="flex items-center gap-3 bg-[#0d1127]/90 border border-indigo-900/50 rounded-xl p-1.5 shadow-inner">
+        <div className="flex items-center gap-3 bg-black/90 border border-white/15 rounded-xl p-1.5 shadow-2xl">
           
-          {/* 1. ATTACKS BLOCKED */}
-          <div className="flex flex-col items-center px-3.5 py-1 rounded-lg bg-[#240c19]/90 border border-rose-500/40 shadow-[0_0_15px_rgba(251,79,99,0.18)]">
-            <span className="text-[10px] font-mono font-semibold text-rose-300/80 uppercase tracking-wider">
+          {/* 1. ATTACKS BLOCKED (Neon Yellow Warning Accent) */}
+          <div className="flex flex-col items-center px-3.5 py-1 rounded-lg bg-[#0a0a0a] border border-[#dfff00]/50 shadow-[0_0_15px_rgba(223,255,0,0.12)]">
+            <span className="text-[10px] font-mono font-bold text-[#dfff00] uppercase tracking-wider">
               Attacks Blocked
             </span>
-            <div className="text-2xl font-bold font-mono text-[#fb4f63] min-w-[2.5rem] text-center">
+            <div className="text-2xl font-bold font-mono text-[#dfff00] min-w-[2.5rem] text-center">
               <AnimatePresence mode="popLayout">
                 <motion.span
                   key={scoreboard.blocked}
@@ -165,12 +165,12 @@ export const TopBar: React.FC<TopBarProps> = ({
             </div>
           </div>
 
-          {/* 2. DECLINED BY AGENT */}
-          <div className="flex flex-col items-center px-3.5 py-1 rounded-lg bg-[#241a0c]/90 border border-amber-500/40 shadow-[0_0_15px_rgba(251,191,36,0.18)]">
-            <span className="text-[10px] font-mono font-semibold text-amber-300/80 uppercase tracking-wider">
+          {/* 2. DECLINED BY AGENT (White Accent) */}
+          <div className="flex flex-col items-center px-3.5 py-1 rounded-lg bg-[#0a0a0a] border border-white/20">
+            <span className="text-[10px] font-mono font-medium text-white/70 uppercase tracking-wider">
               Declined
             </span>
-            <div className="text-2xl font-bold font-mono text-[#fbbf24] min-w-[2.5rem] text-center">
+            <div className="text-2xl font-bold font-mono text-white min-w-[2.5rem] text-center">
               <AnimatePresence mode="popLayout">
                 <motion.span
                   key={scoreboard.declined}
@@ -186,15 +186,15 @@ export const TopBar: React.FC<TopBarProps> = ({
             </div>
           </div>
 
-          {/* 3. SUCCEEDED - RED ALARM (CRITICAL REQUIREMENT: ALWAYS SHOWN) */}
-          <div className="flex flex-col items-center px-3.5 py-1 rounded-lg bg-[#2b0c16]/95 border border-rose-500/60 shadow-[0_0_20px_rgba(251,79,99,0.35)] animate-pulse">
+          {/* 3. SUCCEEDED - SHOWN WITH WHITE + YELLOW HIGHLIGHT */}
+          <div className="flex flex-col items-center px-3.5 py-1 rounded-lg bg-[#0a0a0a] border border-white/30 shadow-[0_0_15px_rgba(255,255,255,0.08)]">
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-              <span className="text-[10px] font-mono font-bold text-rose-300 uppercase tracking-wider">
-                Succeeded 🔴
+              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+              <span className="text-[10px] font-mono font-bold text-white uppercase tracking-wider">
+                Succeeded
               </span>
             </div>
-            <div className="text-2xl font-bold font-mono text-[#fb4f63] min-w-[2.5rem] text-center">
+            <div className="text-2xl font-bold font-mono text-white min-w-[2.5rem] text-center">
               <AnimatePresence mode="popLayout">
                 <motion.span
                   key={scoreboard.succeeded}
@@ -216,4 +216,3 @@ export const TopBar: React.FC<TopBarProps> = ({
     </header>
   )
 }
-
