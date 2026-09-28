@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react"
-import { ShieldCheck, AlertTriangle, RefreshCw } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { ShieldCheck, AlertTriangle, RefreshCw, Maximize2 } from "lucide-react"
 import { TopBar } from "./TopBar"
 import { LiveArena } from "./LiveArena"
 import { DemoControls } from "./DemoControls"
@@ -7,6 +8,7 @@ import { TransactionLedger } from "./TransactionLedger"
 import { CharterPanel } from "./CharterPanel"
 import { ReputationPanel } from "./ReputationPanel"
 import { ReasoningReceiptViewer } from "./ReasoningReceiptViewer"
+import { ExplainerStrip } from "./ExplainerStrip"
 import { TransactionDetail } from "./TransactionDetail"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -24,9 +26,12 @@ export const VerixiaCommandCenter: React.FC = () => {
   const [charterRules, setCharterRules] = useState<CharterRules | null>(null)
   const [charterStatus, setCharterStatus] = useState<CharterStatus | null>(null)
 
-  // PHASE 16: Centralized single-source-of-truth selectedAttempt state
+  // Single source of truth for selected transaction attempt
   const [selectedAttempt, setSelectedAttempt] = useState<TransactionAttempt | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false)
+
+  // Presentation Mode & Fullscreen state
+  const [isPresentationMode, setIsPresentationMode] = useState<boolean>(false)
 
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [isProcessingAction, setIsProcessingAction] = useState<boolean>(false)
@@ -99,6 +104,46 @@ export const VerixiaCommandCenter: React.FC = () => {
     setSelectedAttempt(attempt)
     setIsDetailOpen(true)
   }
+
+  // Toggle Presentation Mode & Fullscreen API
+  const togglePresentationMode = useCallback(() => {
+    setIsPresentationMode((prev) => {
+      const next = !prev
+      if (next) {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {})
+        }
+      } else {
+        if (document.fullscreenElement && document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {})
+        }
+      }
+      return next
+    })
+  }, [])
+
+  // Keyboard shortcut listener ('P' toggles Presentation Mode, 'Escape' exits)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const targetTag = (e.target as HTMLElement)?.tagName?.toUpperCase()
+      if (targetTag === "INPUT" || targetTag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) {
+        return
+      }
+
+      if (e.key === "p" || e.key === "P") {
+        e.preventDefault()
+        togglePresentationMode()
+      } else if (e.key === "Escape" && isPresentationMode) {
+        setIsPresentationMode(false)
+        if (document.fullscreenElement && document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {})
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [togglePresentationMode, isPresentationMode])
 
   // ACTION HANDLERS
   const handleRunSequence = async () => {
@@ -173,17 +218,27 @@ export const VerixiaCommandCenter: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#05070a] text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
+    <div
+      className={`min-h-screen bg-[#05070a] text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black transition-all ${
+        isPresentationMode ? "p-2 lg:p-4 bg-[#030407]" : ""
+      }`}
+    >
       
-      {/* Top Bar with Scoreboard */}
+      {/* Top Bar with Scoreboard & Presentation Toggle */}
       <TopBar
         config={config}
         connectionMode={connectionMode}
         scoreboard={scoreboard}
+        isPresentationMode={isPresentationMode}
+        onTogglePresentationMode={togglePresentationMode}
       />
 
-      {/* Main Command Center Dashboard Viewport */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-8 space-y-6">
+      {/* Main Command Center Viewport */}
+      <main
+        className={`flex-1 w-full mx-auto space-y-6 transition-all ${
+          isPresentationMode ? "max-w-[100vw] p-2" : "max-w-7xl p-4 lg:p-8"
+        }`}
+      >
         
         {/* Error Envelope Alert Banner if API failure occurs */}
         {apiError && (
@@ -209,60 +264,133 @@ export const VerixiaCommandCenter: React.FC = () => {
           </Card>
         )}
 
-        {/* Phase 10: Live Arena Split Screen */}
-        <section className="w-full">
-          <LiveArena
-            goodAgent={goodAgent}
-            badAgent={badAgent}
-            messages={messages}
-            transactions={transactions}
-          />
-        </section>
+        {/* PRESENTATION MODE JUDGE LAYOUT TRANSFORM */}
+        <AnimatePresence mode="wait">
+          {isPresentationMode ? (
+            /* JUDGE DEMO PRESENTATION LAYOUT */
+            <motion.div
+              key="presentation-mode-layout"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              {/* Presentation Mode Header Tag */}
+              <div className="flex items-center justify-between bg-cyan-950/60 border border-cyan-500/40 p-3 rounded-xl">
+                <span className="text-xs font-mono font-bold text-cyan-300 uppercase flex items-center gap-2">
+                  <Maximize2 className="w-4 h-4 text-cyan-400 animate-pulse" />
+                  PROJECTOR DEMO VIEW ACTIVE • PRESS 'P' OR ESCAPE TO EXIT
+                </span>
+                <Button variant="ghost" size="sm" onClick={togglePresentationMode} className="text-xs font-mono">
+                  Exit Fullscreen
+                </Button>
+              </div>
 
-        {/* Phase 11: Demo Controls */}
-        <section className="w-full">
-          <DemoControls
-            onRunSequence={handleRunSequence}
-            onRunAttack={handleRunAttack}
-            onLegitimateOffer={handleLegitimateOffer}
-            isProcessing={isProcessingAction}
-          />
-        </section>
+              {/* 1. Enlarged Live Arena Stream */}
+              <LiveArena
+                goodAgent={goodAgent}
+                badAgent={badAgent}
+                messages={messages}
+                transactions={transactions}
+              />
 
-        {/* Phase 12 & Phase 13: Transaction Ledger + Charter Panel Grid Row */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
-          {/* Phase 12: Transaction Ledger */}
-          <TransactionLedger
-            transactions={transactions}
-            selectedAttemptId={selectedAttempt?.id}
-            onSelectAttempt={handleSelectAttempt}
-            isLoading={false}
-            error={null}
-            onRetry={loadData}
-          />
+              {/* 2. Primary Demo Controls */}
+              <DemoControls
+                onRunSequence={handleRunSequence}
+                onRunAttack={handleRunAttack}
+                onLegitimateOffer={handleLegitimateOffer}
+                isProcessing={isProcessingAction}
+              />
 
-          {/* Phase 13: Spending Charter Panel */}
-          <CharterPanel
-            rules={charterRules}
-            status={charterStatus}
-            selectedAttempt={selectedAttempt}
-          />
-        </section>
+              {/* 3. Reasoning Receipt Viewer & Explainer Strip prominent focus */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ReasoningReceiptViewer
+                  config={config}
+                  selectedAttempt={selectedAttempt}
+                />
+                <CharterPanel
+                  rules={charterRules}
+                  status={charterStatus}
+                  selectedAttempt={selectedAttempt}
+                />
+              </div>
 
-        {/* Phase 14 & Phase 15: Reputation Panel + Reasoning Receipt Viewer Grid Row */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
-          {/* Phase 14: Reputation Panel */}
-          <ReputationPanel
-            config={config}
-            selectedAttempt={selectedAttempt}
-          />
+              {/* Explainer Strip */}
+              <ExplainerStrip selectedAttempt={selectedAttempt} />
+            </motion.div>
+          ) : (
+            /* STANDARD COMMAND CENTER LAYOUT */
+            <motion.div
+              key="standard-mode-layout"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              {/* Phase 10: Live Arena Split Screen */}
+              <section className="w-full">
+                <LiveArena
+                  goodAgent={goodAgent}
+                  badAgent={badAgent}
+                  messages={messages}
+                  transactions={transactions}
+                />
+              </section>
 
-          {/* Phase 15: Reasoning Receipt Viewer */}
-          <ReasoningReceiptViewer
-            config={config}
-            selectedAttempt={selectedAttempt}
-          />
-        </section>
+              {/* Phase 11: Demo Controls */}
+              <section className="w-full">
+                <DemoControls
+                  onRunSequence={handleRunSequence}
+                  onRunAttack={handleRunAttack}
+                  onLegitimateOffer={handleLegitimateOffer}
+                  isProcessing={isProcessingAction}
+                />
+              </section>
+
+              {/* Phase 12 & Phase 13: Transaction Ledger + Charter Panel Grid Row */}
+              <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+                {/* Phase 12: Transaction Ledger */}
+                <TransactionLedger
+                  transactions={transactions}
+                  selectedAttemptId={selectedAttempt?.id}
+                  onSelectAttempt={handleSelectAttempt}
+                  isLoading={false}
+                  error={null}
+                  onRetry={loadData}
+                />
+
+                {/* Phase 13: Spending Charter Panel */}
+                <CharterPanel
+                  rules={charterRules}
+                  status={charterStatus}
+                  selectedAttempt={selectedAttempt}
+                />
+              </section>
+
+              {/* Phase 14 & Phase 15: Reputation Panel + Reasoning Receipt Viewer Grid Row */}
+              <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+                {/* Phase 14: Reputation Panel */}
+                <ReputationPanel
+                  config={config}
+                  selectedAttempt={selectedAttempt}
+                />
+
+                {/* Phase 15: Reasoning Receipt Viewer */}
+                <ReasoningReceiptViewer
+                  config={config}
+                  selectedAttempt={selectedAttempt}
+                />
+              </section>
+
+              {/* Phase 17: Explainer Strip */}
+              <section className="w-full">
+                <ExplainerStrip selectedAttempt={selectedAttempt} />
+              </section>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       </main>
 
