@@ -30,7 +30,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   onBackToLanding,
 }) => {
   return (
-    <header className="w-full bg-slate-950/90 border-b border-slate-800/90 backdrop-blur-xl px-4 lg:px-8 py-3.5 sticky top-0 z-40">
+    <header className="w-full bg-[#0a0d1d]/90 border-b border-indigo-900/40 backdrop-blur-xl px-4 lg:px-8 py-3.5 sticky top-0 z-40 shadow-[0_4px_20px_rgba(8,10,22,0.6)]">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         
         {/* LEFT: Branding & Live Metadata Badges */}
@@ -42,7 +42,7 @@ export const TopBar: React.FC<TopBarProps> = ({
               variant="ghost"
               size="sm"
               onClick={onBackToLanding}
-              className="text-xs font-mono gap-1 text-slate-400 hover:text-cyan-400 p-1.5"
+              className="text-xs font-mono gap-1 text-[#c4c7dc] hover:text-cyan-400 p-1.5 hover:bg-indigo-950/40"
               title="Return to Verixia Landing Page"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -52,25 +52,26 @@ export const TopBar: React.FC<TopBarProps> = ({
 
           {/* Logo */}
           <div className="flex items-center gap-2.5 mr-2">
-            <div className="w-9 h-9 rounded-lg bg-cyan-950/80 border border-cyan-500/50 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-              <ShieldCheck className="w-5.5 h-5.5 text-cyan-400" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-950 via-indigo-950 to-violet-950 border border-cyan-500/50 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.25)] relative group">
+              <div className="absolute inset-0 rounded-xl bg-violet-500/20 blur-md group-hover:bg-cyan-500/30 transition-all" />
+              <ShieldCheck className="w-5.5 h-5.5 text-cyan-400 relative z-10" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-lg tracking-wider text-white font-mono">
+                <span className="font-bold text-lg tracking-wider text-[#f1f2ff] font-mono">
                   VERIXIA
                 </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800/60">
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 shadow-[0_0_10px_rgba(34,211,238,0.2)]">
                   ENFORCEMENT LAYER
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 font-sans">
+              <p className="text-[11px] text-[#c4c7dc] font-sans">
                 On-Chain Autonomous AI Agent Spending Safeguard
               </p>
             </div>
           </div>
 
-          <div className="h-6 w-px bg-slate-800 hidden sm:block" />
+          <div className="h-6 w-px bg-indigo-900/40 hidden sm:block" />
 
           {/* Connection Status Badge */}
           <div className="flex items-center gap-1.5">
@@ -90,7 +91,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             )}
             {connectionMode === "disconnected" && (
               <Badge variant="red" className="gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-red-500" />
+                <span className="w-2 h-2 rounded-full bg-rose-500" />
                 DISCONNECTED
               </Badge>
             )}
@@ -141,13 +142,14 @@ export const TopBar: React.FC<TopBarProps> = ({
         </div>
 
         {/* RIGHT: GIANT LIVE SCOREBOARD */}
-        <div className="flex items-center gap-3 bg-slate-900/90 border border-slate-800 rounded-xl px-4 py-2 shadow-inner">
+        <div className="flex items-center gap-3 bg-[#0d1127]/90 border border-indigo-900/50 rounded-xl p-1.5 shadow-inner">
+          
           {/* 1. ATTACKS BLOCKED */}
-          <div className="flex flex-col items-center px-3 border-r border-slate-800">
-            <span className="text-[10px] font-mono font-medium text-slate-400 uppercase tracking-wider">
+          <div className="flex flex-col items-center px-3.5 py-1 rounded-lg bg-[#240c19]/90 border border-rose-500/40 shadow-[0_0_15px_rgba(251,79,99,0.18)]">
+            <span className="text-[10px] font-mono font-semibold text-rose-300/80 uppercase tracking-wider">
               Attacks Blocked
             </span>
-            <div className="text-2xl font-bold font-mono text-cyan-400 min-w-[2.5rem] text-center">
+            <div className="text-2xl font-bold font-mono text-[#fb4f63] min-w-[2.5rem] text-center">
               <AnimatePresence mode="popLayout">
                 <motion.span
                   key={scoreboard.blocked}
@@ -164,11 +166,11 @@ export const TopBar: React.FC<TopBarProps> = ({
           </div>
 
           {/* 2. DECLINED BY AGENT */}
-          <div className="flex flex-col items-center px-3 border-r border-slate-800">
-            <span className="text-[10px] font-mono font-medium text-slate-400 uppercase tracking-wider">
+          <div className="flex flex-col items-center px-3.5 py-1 rounded-lg bg-[#241a0c]/90 border border-amber-500/40 shadow-[0_0_15px_rgba(251,191,36,0.18)]">
+            <span className="text-[10px] font-mono font-semibold text-amber-300/80 uppercase tracking-wider">
               Declined
             </span>
-            <div className="text-2xl font-bold font-mono text-amber-400 min-w-[2.5rem] text-center">
+            <div className="text-2xl font-bold font-mono text-[#fbbf24] min-w-[2.5rem] text-center">
               <AnimatePresence mode="popLayout">
                 <motion.span
                   key={scoreboard.declined}
@@ -185,14 +187,14 @@ export const TopBar: React.FC<TopBarProps> = ({
           </div>
 
           {/* 3. SUCCEEDED - RED ALARM (CRITICAL REQUIREMENT: ALWAYS SHOWN) */}
-          <div className="flex flex-col items-center px-3 py-0.5 rounded-lg bg-red-950/80 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.35)] animate-pulse">
+          <div className="flex flex-col items-center px-3.5 py-1 rounded-lg bg-[#2b0c16]/95 border border-rose-500/60 shadow-[0_0_20px_rgba(251,79,99,0.35)] animate-pulse">
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-              <span className="text-[10px] font-mono font-bold text-red-300 uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+              <span className="text-[10px] font-mono font-bold text-rose-300 uppercase tracking-wider">
                 Succeeded 🔴
               </span>
             </div>
-            <div className="text-2xl font-bold font-mono text-red-400 min-w-[2.5rem] text-center">
+            <div className="text-2xl font-bold font-mono text-[#fb4f63] min-w-[2.5rem] text-center">
               <AnimatePresence mode="popLayout">
                 <motion.span
                   key={scoreboard.succeeded}
@@ -207,9 +209,11 @@ export const TopBar: React.FC<TopBarProps> = ({
               </AnimatePresence>
             </div>
           </div>
+
         </div>
 
       </div>
     </header>
   )
 }
+

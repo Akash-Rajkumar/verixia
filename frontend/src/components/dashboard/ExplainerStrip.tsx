@@ -16,26 +16,26 @@ export const ExplainerStrip: React.FC<ExplainerStripProps> = ({ selectedAttempt 
   const isDeclined = selectedAttempt?.status === "declined"
 
   return (
-    <Card className="w-full bg-slate-950/95 border-slate-800 p-4 lg:p-5 shadow-xl relative overflow-hidden">
+    <Card className="w-full bg-[#0c1024]/95 border-indigo-900/40 p-4 lg:p-5 shadow-[0_4px_24px_rgba(8,10,22,0.6)] relative overflow-hidden">
       
       {/* Background Subtle Gradient Glow */}
-      <div className="absolute inset-0 bg-gradient-to-r from-cyan-950/20 via-violet-950/20 to-red-950/20 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-cyan-950/20 via-violet-950/25 to-rose-950/20 pointer-events-none" />
 
       <div className="relative z-10 space-y-4">
         
         {/* Header Title & Core Thesis Statement */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-indigo-900/40 pb-3">
           <div>
-            <h4 className="text-xs font-bold font-mono text-cyan-400 uppercase tracking-widest flex items-center gap-2">
+            <h4 className="text-xs font-bold font-mono text-cyan-300 uppercase tracking-widest flex items-center gap-2">
               <Lock className="w-4 h-4 text-cyan-400" />
               WHY THIS CAN'T BE TALKED OUT OF IT
             </h4>
-            <p className="text-xs text-slate-300 font-sans font-medium mt-0.5">
+            <p className="text-xs text-[#c4c7dc] font-sans font-medium mt-0.5">
               The model can propose. The charter enforces.
             </p>
           </div>
 
-          <Badge variant="cyan" className="text-[10px] py-0.5 px-2">
+          <Badge variant="violet" className="text-[10px] py-0.5 px-2">
             ON-CHAIN SECURITY PARADIGM
           </Badge>
         </div>
@@ -49,27 +49,27 @@ export const ExplainerStrip: React.FC<ExplainerStripProps> = ({ selectedAttempt 
             initial={{ opacity: 0.6, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center gap-3 relative"
+            className="p-3.5 rounded-xl bg-[#09152a]/80 border border-cyan-900/40 flex items-center gap-3 relative shadow-sm"
           >
-            <div className="w-9 h-9 rounded-lg bg-cyan-950 border border-cyan-500/40 flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-lg bg-cyan-950 border border-cyan-500/40 flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(34,211,238,0.2)]">
               <Cpu className="w-5 h-5 text-cyan-400" />
             </div>
             <div>
-              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">
+              <span className="text-[10px] font-mono text-[#858aa6] uppercase tracking-wider block">
                 STAGE 1
               </span>
-              <h5 className="text-xs font-bold font-mono text-slate-100 uppercase">
+              <h5 className="text-xs font-bold font-mono text-[#f1f2ff] uppercase">
                 LLM Decision
               </h5>
-              <p className="text-[11px] text-slate-400 font-sans">
+              <p className="text-[11px] text-[#c4c7dc] font-sans">
                 Agent evaluates prompt proposal
               </p>
             </div>
           </motion.div>
 
           {/* Connection Arrow 1 */}
-          <div className="hidden md:flex justify-center -mx-2 text-slate-600">
-            <ArrowRight className="w-5 h-5 text-cyan-500/60 animate-pulse" />
+          <div className="hidden md:flex justify-center -mx-2 text-[#7c86b8]">
+            <ArrowRight className="w-5 h-5 text-violet-400/80 animate-pulse" />
           </div>
 
           {/* STAGE 2: SPENDING CHARTER ON-CHAIN POLICY CHECK */}
@@ -80,39 +80,39 @@ export const ExplainerStrip: React.FC<ExplainerStripProps> = ({ selectedAttempt 
             transition={{ duration: 0.4 }}
             className={`p-3.5 rounded-xl border flex items-center gap-3 transition-all ${
               isBlocked
-                ? "bg-red-950/40 border-red-500/70 shadow-[0_0_15px_rgba(239,68,68,0.25)]"
+                ? "bg-[#250d19]/90 border-rose-500/70 shadow-[0_0_18px_rgba(251,79,99,0.25)]"
                 : isExecuted
-                ? "bg-emerald-950/40 border-emerald-500/70 shadow-[0_0_15px_rgba(16,185,129,0.25)]"
-                : "bg-slate-900/80 border-cyan-500/40"
+                ? "bg-[#092723]/90 border-emerald-500/70 shadow-[0_0_18px_rgba(52,211,153,0.25)]"
+                : "bg-[#121638]/90 border-violet-500/40"
             }`}
           >
             <div
               className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${
                 isBlocked
-                  ? "bg-red-950 border-red-500/60 text-red-400"
+                  ? "bg-[#30101e] border-rose-500/60 text-rose-400"
                   : isExecuted
-                  ? "bg-emerald-950 border-emerald-500/60 text-emerald-400"
-                  : "bg-cyan-950 border-cyan-500/40 text-cyan-400"
+                  ? "bg-[#0a2f26] border-emerald-500/60 text-emerald-400"
+                  : "bg-[#1d163e] border-violet-500/50 text-violet-300"
               }`}
             >
               <Lock className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">
+              <span className="text-[10px] font-mono text-[#858aa6] uppercase tracking-wider block">
                 STAGE 2
               </span>
-              <h5 className="text-xs font-bold font-mono text-slate-100 uppercase">
+              <h5 className="text-xs font-bold font-mono text-[#f1f2ff] uppercase">
                 Spending Charter
               </h5>
-              <p className="text-[11px] text-slate-400 font-sans">
+              <p className="text-[11px] text-[#c4c7dc] font-sans">
                 Solidity smart contract check
               </p>
             </div>
           </motion.div>
 
           {/* Connection Arrow 2 */}
-          <div className="hidden md:flex justify-center -mx-2 text-slate-600">
-            <ArrowRight className="w-5 h-5 text-cyan-500/60 animate-pulse" />
+          <div className="hidden md:flex justify-center -mx-2 text-[#7c86b8]">
+            <ArrowRight className="w-5 h-5 text-violet-400/80 animate-pulse" />
           </div>
 
           {/* STAGE 3: RESULT */}
@@ -123,43 +123,43 @@ export const ExplainerStrip: React.FC<ExplainerStripProps> = ({ selectedAttempt 
             transition={{ duration: 0.5 }}
             className={`p-3.5 rounded-xl border flex items-center gap-3 transition-all ${
               isBlocked
-                ? "bg-red-950/60 border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.35)]"
+                ? "bg-[#2b0c16]/95 border-rose-500 shadow-[0_0_20px_rgba(251,79,99,0.35)]"
                 : isExecuted
-                ? "bg-emerald-950/60 border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.35)]"
+                ? "bg-[#092723]/95 border-emerald-500 shadow-[0_0_20px_rgba(52,211,153,0.35)]"
                 : isDeclined
-                ? "bg-amber-950/60 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.25)]"
-                : "bg-slate-900/80 border-slate-800"
+                ? "bg-[#2a1a0c]/95 border-amber-500 shadow-[0_0_15px_rgba(251,191,36,0.25)]"
+                : "bg-[#0c1024]/90 border-indigo-900/40"
             }`}
           >
             <div
               className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${
                 isBlocked
-                  ? "bg-red-950 border-red-500 text-red-400"
+                  ? "bg-[#30101e] border-rose-500 text-rose-400"
                   : isExecuted
-                  ? "bg-emerald-950 border-emerald-500 text-emerald-400"
+                  ? "bg-[#0a2f26] border-emerald-500 text-emerald-400"
                   : isDeclined
-                  ? "bg-amber-950 border-amber-500 text-amber-400"
-                  : "bg-slate-900 border-slate-700 text-slate-400"
+                  ? "bg-[#2e200a] border-amber-500 text-amber-400"
+                  : "bg-[#101535] border-indigo-900/50 text-[#7c86b8]"
               }`}
             >
-              {isBlocked && <ShieldAlert className="w-5 h-5 animate-pulse" />}
-              {isExecuted && <ShieldCheck className="w-5 h-5" />}
-              {isDeclined && <AlertTriangle className="w-5 h-5" />}
-              {!isBlocked && !isExecuted && !isDeclined && <CheckCircle2 className="w-5 h-5" />}
+              {isBlocked && <ShieldAlert className="w-5 h-5 animate-pulse text-rose-400" />}
+              {isExecuted && <ShieldCheck className="w-5 h-5 text-emerald-400" />}
+              {isDeclined && <AlertTriangle className="w-5 h-5 text-amber-400" />}
+              {!isBlocked && !isExecuted && !isDeclined && <CheckCircle2 className="w-5 h-5 text-[#7c86b8]" />}
             </div>
             <div>
-              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">
+              <span className="text-[10px] font-mono text-[#858aa6] uppercase tracking-wider block">
                 STAGE 3: FINAL RESULT
               </span>
               <h5
                 className={`text-xs font-bold font-mono uppercase ${
                   isBlocked
-                    ? "text-red-400"
+                    ? "text-rose-300"
                     : isExecuted
-                    ? "text-emerald-400"
+                    ? "text-emerald-300"
                     : isDeclined
-                    ? "text-amber-400"
-                    : "text-slate-200"
+                    ? "text-amber-300"
+                    : "text-[#f1f2ff]"
                 }`}
               >
                 {isBlocked
@@ -170,7 +170,7 @@ export const ExplainerStrip: React.FC<ExplainerStripProps> = ({ selectedAttempt 
                   ? "DECLINED BY AGENT"
                   : selectedAttempt?.status.toUpperCase() || "NO EVENT SELECTED"}
               </h5>
-              <p className="text-[11px] text-slate-300 font-sans">
+              <p className="text-[11px] text-[#c4c7dc] font-sans">
                 {isBlocked
                   ? "Enforcement boundary held."
                   : isExecuted
@@ -188,3 +188,4 @@ export const ExplainerStrip: React.FC<ExplainerStripProps> = ({ selectedAttempt 
     </Card>
   )
 }
+

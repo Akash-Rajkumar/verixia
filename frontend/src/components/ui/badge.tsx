@@ -14,13 +14,13 @@ export const Badge: React.FC<BadgeProps> = ({
   return (
     <span
       className={clsx(
-        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium tracking-wide uppercase border",
-        variant === "cyan" && "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
-        variant === "red" && "bg-red-500/15 text-red-400 border-red-500/40 shadow-[0_0_10px_rgba(239,68,68,0.2)]",
-        variant === "emerald" && "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
-        variant === "amber" && "bg-amber-500/10 text-amber-400 border-amber-500/30",
-        variant === "violet" && "bg-violet-500/10 text-violet-400 border-violet-500/30",
-        variant === "neutral" && "bg-slate-800/80 text-slate-300 border-slate-700",
+        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium tracking-wide uppercase border backdrop-blur-md",
+        variant === "cyan" && "bg-cyan-950/80 text-cyan-300 border-cyan-500/40 shadow-[0_0_10px_rgba(34,211,238,0.15)]",
+        variant === "red" && "bg-rose-950/85 text-rose-300 border-rose-500/45 shadow-[0_0_12px_rgba(251,79,99,0.25)]",
+        variant === "emerald" && "bg-emerald-950/80 text-emerald-300 border-emerald-500/40 shadow-[0_0_10px_rgba(52,211,153,0.15)]",
+        variant === "amber" && "bg-amber-950/80 text-amber-300 border-amber-500/40 shadow-[0_0_10px_rgba(251,191,36,0.15)]",
+        variant === "violet" && "bg-violet-950/80 text-violet-300 border-violet-500/40 shadow-[0_0_10px_rgba(124,108,245,0.15)]",
+        variant === "neutral" && "bg-[#121630]/90 text-[#c4c7dc] border-[#22284c]",
         className
       )}
       {...props}
@@ -29,3 +29,4 @@ export const Badge: React.FC<BadgeProps> = ({
     </span>
   )
 }
+

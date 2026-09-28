@@ -2,46 +2,92 @@
 
 @layer base {
   :root {
-    --bg-dark: #07090e;
-    --card-bg: rgba(13, 17, 26, 0.7);
-    --border-cyan: rgba(6, 182, 212, 0.2);
-    --cyan-glow: rgba(6, 182, 212, 0.15);
+    --verixia-bg-dark: #080a16;
+    --verixia-surface-base: rgba(16, 20, 42, 0.82);
+    --verixia-surface-blue: rgba(16, 27, 58, 0.82);
+    --verixia-surface-violet: rgba(29, 22, 62, 0.80);
+    --verixia-surface-burgundy: rgba(37, 13, 25, 0.85);
+    --verixia-surface-emerald: rgba(9, 39, 35, 0.85);
+    
+    --verixia-cyan: #22d3ee;
+    --verixia-violet: #7c6cf5;
+    --verixia-indigo: #6366f1;
+    --verixia-magenta: #d946ef;
+    --verixia-crimson: #fb4f63;
+    --verixia-emerald: #34d399;
+    --verixia-amber: #fbbf24;
+    
+    --verixia-text-primary: #f1f2ff;
+    --verixia-text-secondary: #c4c7dc;
+    --verixia-text-muted: #858aa6;
+    --verixia-text-technical: #7c86b8;
   }
 
   body {
-    background-color: #05070a;
-    color: #e2e8f0;
+    background-color: #080a16;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(124, 108, 245, 0.12) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(34, 211, 238, 0.12) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, rgba(99, 102, 241, 0.10) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, rgba(217, 70, 239, 0.08) 0px, transparent 50%);
+    background-attachment: fixed;
+    color: #f1f2ff;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     overflow-x: hidden;
   }
 }
 
-/* Custom Utilities & Animations */
-.glass-panel {
-  background: rgba(13, 17, 26, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glass-panel-glow {
-  background: rgba(13, 17, 26, 0.85);
+/* Verixia Tinted Glass Panels */
+.glass-verixia-base {
+  background: rgba(16, 20, 42, 0.82);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(6, 182, 212, 0.25);
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
 }
 
-.glow-red {
-  box-shadow: 0 0 25px rgba(239, 68, 68, 0.35);
+.glass-verixia-blue {
+  background: rgba(16, 27, 58, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  box-shadow: 0 0 25px rgba(34, 211, 238, 0.08);
 }
 
-.glow-cyan {
-  box-shadow: 0 0 25px rgba(6, 182, 212, 0.25);
+.glass-verixia-violet {
+  background: rgba(29, 22, 62, 0.80);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(124, 108, 245, 0.3);
+  box-shadow: 0 0 25px rgba(124, 108, 245, 0.1);
 }
 
-.glow-emerald {
-  box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+.glass-verixia-burgundy {
+  background: rgba(37, 13, 25, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(251, 79, 99, 0.35);
+  box-shadow: 0 0 25px rgba(251, 79, 99, 0.12);
+}
+
+.glass-verixia-emerald {
+  background: rgba(9, 39, 35, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  box-shadow: 0 0 25px rgba(52, 211, 153, 0.1);
+}
+
+/* Gradient Text Utilities */
+.text-gradient-cyan-violet {
+  background: linear-gradient(135deg, #22d3ee 0%, #a78bfa 50%, #7c6cf5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-violet-magenta {
+  background: linear-gradient(135deg, #7c6cf5 0%, #d946ef 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* Custom Scrollbar */
@@ -50,12 +96,13 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #07090e;
+  background: #080a16;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #1e264a;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #06b6d4;
+  background: #7c6cf5;
 }
+

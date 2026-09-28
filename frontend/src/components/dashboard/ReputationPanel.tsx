@@ -105,24 +105,24 @@ export const ReputationPanel: React.FC<ReputationPanelProps> = ({
     : []
 
   return (
-    <Card className="w-full bg-slate-950/90 border-slate-800 shadow-2xl p-5 flex flex-col h-[520px] overflow-hidden">
+    <Card className="w-full bg-[#0f1430]/90 border-indigo-900/40 shadow-2xl p-5 flex flex-col h-[520px] overflow-hidden">
       
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-800/80 pb-3 mb-4">
+      <div className="flex items-center justify-between border-b border-indigo-900/40 pb-3 mb-4">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-violet-950/80 border border-violet-500/50 flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.25)]">
+          <div className="w-9 h-9 rounded-xl bg-[#1d163e]/90 border border-violet-500/50 flex items-center justify-center shadow-[0_0_18px_rgba(124,108,245,0.3)]">
             <Award className="w-5 h-5 text-violet-400" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold font-mono text-slate-100 uppercase tracking-wider">
+              <h3 className="text-sm font-bold font-mono text-[#f1f2ff] uppercase tracking-wider">
                 Reputation Registry
               </h3>
               <Badge variant="violet" className="text-[10px] py-0 px-1.5">
                 MULTI-AXIS SIGNALS
               </Badge>
             </div>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-[#c4c7dc]">
               On-chain non-aggregate agent competence & compliance metrics
             </p>
           </div>
@@ -141,36 +141,36 @@ export const ReputationPanel: React.FC<ReputationPanelProps> = ({
       <div className="flex-1 overflow-y-auto space-y-5 pr-1">
         
         {/* Radar Chart & Axis Metrics Split View */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center bg-slate-900/40 p-4 border border-slate-800/80 rounded-xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center bg-[#0a0d24]/80 p-4 border border-indigo-900/40 rounded-xl">
           
           {/* Radar Chart Visual */}
           <div className="h-56 w-full flex items-center justify-center relative">
             {isLoading ? (
-              <div className="text-xs font-mono text-slate-500 animate-pulse">
+              <div className="text-xs font-mono text-[#7c86b8] animate-pulse">
                 Loading reputation signals...
               </div>
             ) : !hasAxes ? (
               /* REQUIRED: NO FEEDBACK YET STATE */
               <div className="flex flex-col items-center justify-center text-center p-4 space-y-2">
-                <HelpCircle className="w-8 h-8 text-slate-700" />
-                <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider">
+                <HelpCircle className="w-8 h-8 text-[#7c86b8]" />
+                <span className="text-xs font-mono font-bold text-amber-300 uppercase tracking-wider">
                   NO FEEDBACK YET
                 </span>
-                <p className="text-[11px] font-sans text-slate-400 max-w-xs">
+                <p className="text-[11px] font-sans text-[#c4c7dc] max-w-xs">
                   No verified on-chain feedback events exist for this address. Axes remain unrated until stake-backed ratings are recorded.
                 </p>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
-                  <PolarGrid stroke="#334155" />
-                  <PolarAngleAxis dataKey="axis" stroke="#94a3b8" tick={{ fill: "#94a3b8", fontSize: 11 }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#475569" tick={false} />
+                  <PolarGrid stroke="#22284c" />
+                  <PolarAngleAxis dataKey="axis" stroke="#c4c7dc" tick={{ fill: "#c4c7dc", fontSize: 11 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#3b447a" tick={false} />
                   <Radar
                     name="Reputation"
                     dataKey="value"
-                    stroke="#a855f7"
-                    fill="#a855f7"
+                    stroke="#22d3ee"
+                    fill="#7c6cf5"
                     fillOpacity={0.4}
                   />
                 </RadarChart>
@@ -180,24 +180,24 @@ export const ReputationPanel: React.FC<ReputationPanelProps> = ({
 
           {/* 4 Independent Axes Breakdown (NO AGGREGATE DISPLAY) */}
           <div className="space-y-2.5 font-mono text-xs">
-            <span className="text-[10px] text-slate-400 uppercase tracking-wider block border-b border-slate-800 pb-1">
+            <span className="text-[10px] text-[#858aa6] uppercase tracking-wider block border-b border-indigo-900/40 pb-1">
               Independent Axis Ratings (0-100)
             </span>
 
             {[
-              { label: "Competence", val: reputation?.axes?.competence, color: "text-cyan-400", bg: "bg-cyan-500" },
-              { label: "Honesty", val: reputation?.axes?.honesty, color: "text-emerald-400", bg: "bg-emerald-500" },
-              { label: "Compliance", val: reputation?.axes?.compliance, color: "text-violet-400", bg: "bg-violet-500" },
-              { label: "Reliability", val: reputation?.axes?.reliability, color: "text-amber-400", bg: "bg-amber-500" },
+              { label: "Competence", val: reputation?.axes?.competence, color: "text-cyan-300", bg: "bg-cyan-500" },
+              { label: "Honesty", val: reputation?.axes?.honesty, color: "text-emerald-300", bg: "bg-emerald-500" },
+              { label: "Compliance", val: reputation?.axes?.compliance, color: "text-violet-300", bg: "bg-violet-500" },
+              { label: "Reliability", val: reputation?.axes?.reliability, color: "text-amber-300", bg: "bg-amber-500" },
             ].map((axis) => (
               <div key={axis.label} className="space-y-1">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-300">{axis.label}</span>
+                  <span className="text-[#f1f2ff]">{axis.label}</span>
                   <span className={`font-bold ${axis.color}`}>
                     {axis.val !== null && axis.val !== undefined ? `${axis.val} / 100` : "NO DATA"}
                   </span>
                 </div>
-                <div className="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                <div className="w-full h-1.5 bg-[#080a16] rounded-full overflow-hidden border border-indigo-900/40">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${axis.val || 0}%` }}
@@ -208,7 +208,7 @@ export const ReputationPanel: React.FC<ReputationPanelProps> = ({
               </div>
             ))}
 
-            <div className="pt-2 flex items-center justify-between text-[10px] text-slate-400">
+            <div className="pt-2 flex items-center justify-between text-[10px] text-[#858aa6]">
               <span>Feedback Count: {reputation?.feedbackCount || 0}</span>
               <span>Source: {reputation?.source || "chain"}</span>
             </div>
@@ -220,7 +220,7 @@ export const ReputationPanel: React.FC<ReputationPanelProps> = ({
         {config?.features.stakeSlash !== false && (
           <div className="space-y-3 font-mono">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span className="text-xs font-bold text-[#f1f2ff] uppercase tracking-wider flex items-center gap-1.5">
                 <Gavel className="w-3.5 h-3.5 text-amber-400" />
                 Stake & Slash Feedback Events
               </span>
@@ -230,7 +230,7 @@ export const ReputationPanel: React.FC<ReputationPanelProps> = ({
             </div>
 
             {feedbackEvents.length === 0 ? (
-              <div className="p-3 bg-slate-900/30 border border-slate-800 rounded-lg text-center text-xs text-slate-400">
+              <div className="p-3 bg-[#0a0d24]/40 border border-indigo-900/40 rounded-lg text-center text-xs text-[#858aa6]">
                 No active feedback events recorded for this address.
               </div>
             ) : (
@@ -238,18 +238,18 @@ export const ReputationPanel: React.FC<ReputationPanelProps> = ({
                 {feedbackEvents.map((fb) => (
                   <div
                     key={fb.id}
-                    className="p-3 rounded-lg bg-slate-900/60 border border-slate-800 flex items-center justify-between text-xs gap-3"
+                    className="p-3 rounded-lg bg-[#0a0d24]/80 border border-indigo-900/40 flex items-center justify-between text-xs gap-3"
                   >
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-200">
+                        <span className="font-bold text-[#f1f2ff]">
                           Event #{fb.feedbackId}
                         </span>
-                        <span className="text-[11px] text-cyan-400">
+                        <span className="text-[11px] text-cyan-300">
                           Stake: {formatNativeAmount(fb.stakeWei, 18, "MST")}
                         </span>
                       </div>
-                      <div className="text-[10px] text-slate-400">
+                      <div className="text-[10px] text-[#858aa6]">
                         Author: {truncateAddress(fb.authorAddress, 6, 4)} | Tx: {truncateHash(fb.txHash, 6, 4)}
                       </div>
                     </div>
@@ -277,7 +277,7 @@ export const ReputationPanel: React.FC<ReputationPanelProps> = ({
                           size="sm"
                           isLoading={disputingId === fb.feedbackId}
                           onClick={() => handleDispute(fb.feedbackId)}
-                          className="text-[10px] font-mono py-0.5 px-2 border-amber-500/40 text-amber-300 hover:bg-amber-950/40"
+                          className="text-[10px] font-mono py-0.5 px-2 bg-[#2a1a0c]/80 border-amber-500/40 text-amber-300 hover:bg-[#35200e]"
                         >
                           Dispute
                         </Button>
@@ -295,3 +295,4 @@ export const ReputationPanel: React.FC<ReputationPanelProps> = ({
     </Card>
   )
 }
+
