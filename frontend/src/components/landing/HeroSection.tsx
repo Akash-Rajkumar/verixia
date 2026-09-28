@@ -100,20 +100,23 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenCommandCenter })
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="lg:col-span-7 relative h-[420px] sm:h-[500px] lg:h-[560px] w-full rounded-2xl overflow-hidden border border-cyan-500/30 bg-[#0c1024]/80 shadow-[0_0_40px_rgba(34,211,238,0.15)] group"
+          className="lg:col-span-7 relative h-[420px] sm:h-[500px] lg:h-[560px] w-full rounded-2xl overflow-hidden border border-white/15 hover:border-white/30 bg-[#020203] shadow-[0_0_40px_rgba(255,255,255,0.05)] transition-colors group"
         >
-          {/* Spotlight Effect over 3D Canvas */}
-          <Spotlight fill="rgba(124, 108, 245, 0.25)" />
+          {/* Subtle Radial White Highlight behind 3D Object */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06)_0%,transparent_60%)] pointer-events-none z-0" />
+
+          {/* Spotlight Effect over 3D Canvas (Subtle Silver Highlight) */}
+          <Spotlight fill="rgba(255, 255, 255, 0.08)" />
 
           {/* 3D Spline Scene */}
           <SplineScene
             scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-            className="w-full h-full"
+            className="w-full h-full relative z-10"
           />
 
           {/* Floating Status Card (Bottom-Right Overlay) */}
-          <div className="absolute bottom-4 right-4 z-20 bg-[#0a0d1d]/90 border border-emerald-500/30 backdrop-blur-xl p-3.5 rounded-xl shadow-2xl flex items-center gap-3 font-mono">
-            <div className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
+          <div className="absolute bottom-4 right-4 z-20 bg-black/85 border border-white/15 backdrop-blur-xl p-3.5 rounded-xl shadow-2xl flex items-center gap-3 font-mono">
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
             <div>
               <span className="text-[10px] text-[#858aa6] uppercase tracking-wider block">
                 VERIXIA TRUST LAYER
