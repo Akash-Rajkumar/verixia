@@ -1,6 +1,6 @@
 import React from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ShieldCheck, Cpu, Database, AlertTriangle, Radio, Maximize2, Minimize2 } from "lucide-react"
+import { ShieldCheck, Cpu, Database, AlertTriangle, Radio, Maximize2, Minimize2, ArrowLeft } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { PublicConfig } from "@/api/types"
@@ -17,6 +17,7 @@ export interface TopBarProps {
   fellBackToOllama?: boolean
   isPresentationMode?: boolean
   onTogglePresentationMode?: () => void
+  onBackToLanding?: () => void
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -26,6 +27,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   fellBackToOllama = false,
   isPresentationMode = false,
   onTogglePresentationMode,
+  onBackToLanding,
 }) => {
   return (
     <header className="w-full bg-slate-950/90 border-b border-slate-800/90 backdrop-blur-xl px-4 lg:px-8 py-3.5 sticky top-0 z-40">
@@ -33,6 +35,21 @@ export const TopBar: React.FC<TopBarProps> = ({
         
         {/* LEFT: Branding & Live Metadata Badges */}
         <div className="flex items-center flex-wrap gap-3">
+          
+          {/* Back to Landing Button */}
+          {onBackToLanding && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onBackToLanding}
+              className="text-xs font-mono gap-1 text-slate-400 hover:text-cyan-400 p-1.5"
+              title="Return to Verixia Landing Page"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Landing</span>
+            </Button>
+          )}
+
           {/* Logo */}
           <div className="flex items-center gap-2.5 mr-2">
             <div className="w-9 h-9 rounded-lg bg-cyan-950/80 border border-cyan-500/50 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.3)]">

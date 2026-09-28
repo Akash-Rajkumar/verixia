@@ -16,7 +16,11 @@ import { useLiveFeed } from "@/hooks/useLiveFeed"
 import { api } from "@/api"
 import type { Agent, CharterRules, CharterStatus, Message, PublicConfig, TransactionAttempt } from "@/api/types"
 
-export const VerixiaCommandCenter: React.FC = () => {
+export interface VerixiaCommandCenterProps {
+  onBackToLanding?: () => void
+}
+
+export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBackToLanding }) => {
   const { connectionMode, refreshSignal, refetchNow } = useLiveFeed()
 
   const [config, setConfig] = useState<PublicConfig | null>(null)
@@ -231,6 +235,7 @@ export const VerixiaCommandCenter: React.FC = () => {
         scoreboard={scoreboard}
         isPresentationMode={isPresentationMode}
         onTogglePresentationMode={togglePresentationMode}
+        onBackToLanding={onBackToLanding}
       />
 
       {/* Main Command Center Viewport */}
