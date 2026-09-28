@@ -138,7 +138,7 @@ describe("ReputationRegistry", function () {
       .to.be.revertedWithCustomError(registry, "InvalidSubject");
   });
 
-  it("accepts zero scores and zero stake", async function () {
+  it("accepts zero scores and zero stake when minStake is zero", async function () {
     await register(author);
     const id = await nextId(author, subject.address, [0, 0, 0, 0], evidenceHash);
     expect(id).to.equal(1n);
@@ -236,11 +236,203 @@ describe("ReputationRegistry", function () {
     ]);
   });
 
-  it("rejects nonzero stake while M7 is disabled", async function () {
+  it("enforces owner-only minimum stake and accepts equal or greater stake", async function () {
+    await expect(registry.connect(outsider).setMinStake(5n)).to.be.reverted;
+    await registry.connect(owner).setMinStake(5n);
     await register(author);
-    await expect(submit(author, subject.address, [10, 20, 30, 40], evidenceHash, 1n))
-      .to.be.revertedWithCustomError(registry, "StakingNotEnabled");
-    expect(await nextId(author, subject.address, [10, 20, 30, 40], evidenceHash)).to.equal(1n);
+
+    await expect(submit(author, subject.address, [10, 20, 30, 40], evidenceHash, 4n))
+      .to.be.revertedWithCustomError(registry, "StakeBelowMinimum");
+    expect(await nextId(author, subject.address, [10, 20, 30, 40], evidenceHash, 5n)).to.equal(1n);
+
+    await submit(author, subject.address, [10, 20, 30, 40], evidenceHash, 5n);
+    await submit(author, secondSubject.address, [20, 30, 40, 50], evidenceHash, 8n);
+    await registry.connect(owner).setMinStake(20n);
+
+    expect((await registry.getFeedback(1n)).stake).to.equal(5n);
+    expect((await registry.getFeedback(2n)).stake).to.equal(8n);
+  });
+
+  it("requires the exact recorded stake as dispute bond and records the disputer", async function () {
+    await registry.connect(owner).setMinStake(10n);
+    await register(author);
+    await submit(author, subject.address, [10, 20, 30, 40], evidenceHash, 10n);
+
+    await expect(registry.connect(outsider).disputeFeedback(1n, evidenceHash, { value: 9n }))
+      .to.be.revertedWithCustomError(registry, "IncorrectDisputeBond");
+    await expect(registry.connect(outsider).disputeFeedback(1n, evidenceHash, { value: 11n }))
+      .to.be.revertedWithCustomError(registry, "IncorrectDisputeBond");
+
+    const event = registry.interface.getEvent("FeedbackDisputed");
+    expect(event.format("sighash")).to.equal("FeedbackDisputed(uint256,address,bytes32)");
+    expect(event.inputs.map((input) => input.indexed)).to.deep.equal([true, true, false]);
+
+    await expect(registry.connect(outsider).disputeFeedback(1n, ethers.ZeroHash, { value: 10n }))
+      .to.emit(registry, "FeedbackDisputed")
+      .withArgs(1n, outsider.address, ethers.ZeroHash);
+    expect((await registry.getFeedback(1n)).status).to.equal(1);
+  });
+
+  it("rejects a duplicate dispute without changing contract balance or feedback state", async function () {
+    await registry.connect(owner).setMinStake(5n);
+    await register(author);
+    await submit(author, subject.address, [10, 20, 30, 40], evidenceHash, 5n);
+    await registry.connect(outsider).disputeFeedback(1n, evidenceHash, { value: 5n });
+
+    const balanceBefore = await ethers.provider.getBalance(await registry.getAddress());
+    const feedbackBefore = await registry.getFeedback(1n);
+    const reputationBefore = await registry.getReputation(subject.address);
+
+    await expect(registry.connect(secondAuthor).disputeFeedback(1n, evidenceHash, { value: 5n }))
+      .to.be.revertedWithCustomError(registry, "InvalidFeedbackStatus");
+
+    expect(await ethers.provider.getBalance(await registry.getAddress())).to.equal(balanceBefore);
+    expect(await registry.getFeedback(1n)).to.deep.equal(feedbackBefore);
+    expect(await registry.getReputation(subject.address)).to.deep.equal(reputationBefore);
+  });
+
+  it("rejects direct resolution of active feedback without changing state", async function () {
+    await registry.connect(owner).setMinStake(5n);
+    await register(author);
+    await submit(author, subject.address, [10, 20, 30, 40], evidenceHash, 5n);
+
+    const balanceBefore = await ethers.provider.getBalance(await registry.getAddress());
+    const reputationBefore = await registry.getReputation(subject.address);
+
+    await expect(registry.connect(owner).resolveDispute(1n, true))
+      .to.be.revertedWithCustomError(registry, "InvalidFeedbackStatus");
+
+    expect((await registry.getFeedback(1n)).status).to.equal(0);
+    expect(await registry.getReputation(subject.address)).to.deep.equal(reputationBefore);
+    expect(await ethers.provider.getBalance(await registry.getAddress())).to.equal(balanceBefore);
+  });
+
+  it("rejects unknown feedback IDs in dispute, resolution, and release calls", async function () {
+    await expect(registry.connect(outsider).disputeFeedback(999n, evidenceHash))
+      .to.be.revertedWithCustomError(registry, "FeedbackNotFound");
+    await expect(registry.connect(owner).resolveDispute(999n, false))
+      .to.be.revertedWithCustomError(registry, "FeedbackNotFound");
+    await expect(registry.connect(author).releaseStake(999n)).to.be.reverted;
+  });
+
+  it("declares the required StakeReleased event signature and indexed fields", async function () {
+    const event = registry.interface.getEvent("StakeReleased");
+    expect(event.format("sighash")).to.equal("StakeReleased(uint256,address,uint256)");
+    expect(event.inputs.map((input) => input.indexed)).to.deep.equal([true, true, false]);
+  });
+
+  it("keeps the releaseStake TODO state- and balance-neutral", async function () {
+    await registry.connect(owner).setMinStake(5n);
+    await register(author);
+    await submit(author, subject.address, [10, 20, 30, 40], evidenceHash, 5n);
+
+    const balanceBefore = await ethers.provider.getBalance(await registry.getAddress());
+    const feedbackBefore = await registry.getFeedback(1n);
+    const reputationBefore = await registry.getReputation(subject.address);
+
+    await expect(registry.connect(author).releaseStake(1n)).to.be.reverted;
+
+    expect(await registry.getFeedback(1n)).to.deep.equal(feedbackBefore);
+    expect(await registry.getReputation(subject.address)).to.deep.equal(reputationBefore);
+    expect(await ethers.provider.getBalance(await registry.getAddress())).to.equal(balanceBefore);
+  });
+
+  it("resolves upheld feedback to status 2 and returns both stakes to the author", async function () {
+    await registry.connect(owner).setMinStake(10n);
+    await register(author);
+    await submit(author, subject.address, [10, 20, 30, 40], evidenceHash, 10n);
+    await registry.connect(outsider).disputeFeedback(1n, evidenceHash, { value: 10n });
+
+    const contractBefore = await ethers.provider.getBalance(await registry.getAddress());
+    const authorBefore = await ethers.provider.getBalance(author.address);
+    const disputerBefore = await ethers.provider.getBalance(outsider.address);
+    const reputationBefore = await registry.getReputation(subject.address);
+
+    const event = registry.interface.getEvent("DisputeResolved");
+    expect(event.format("sighash")).to.equal("DisputeResolved(uint256,bool)");
+    expect(event.inputs.map((input) => input.indexed)).to.deep.equal([true, false]);
+
+    await expect(registry.connect(owner).resolveDispute(1n, false))
+      .to.emit(registry, "DisputeResolved")
+      .withArgs(1n, false);
+
+    expect((await registry.getFeedback(1n)).status).to.equal(2);
+    expect(await ethers.provider.getBalance(await registry.getAddress())).to.equal(contractBefore - 20n);
+    expect(await ethers.provider.getBalance(author.address)).to.equal(authorBefore + 20n);
+    expect(await ethers.provider.getBalance(outsider.address)).to.equal(disputerBefore);
+    expect(await registry.getReputation(subject.address)).to.deep.equal(reputationBefore);
+  });
+
+  it("allows only the owner to resolve a disputed feedback", async function () {
+    await registry.connect(owner).setMinStake(5n);
+    await register(author);
+    await submit(author, subject.address, [1, 2, 3, 4], evidenceHash, 5n);
+    await registry.connect(outsider).disputeFeedback(1n, evidenceHash, { value: 5n });
+
+    await expect(registry.connect(secondAuthor).resolveDispute(1n, true)).to.be.reverted;
+    expect((await registry.getFeedback(1n)).status).to.equal(1);
+  });
+
+  it("slashes exactly one aggregate contribution and transfers both stakes to the disputer", async function () {
+    await registry.connect(owner).setMinStake(5n);
+    await register(author);
+    await register(secondAuthor);
+    await submit(author, subject.address, [1, 2, 3, 4], evidenceHash, 5n);
+    await submit(secondAuthor, subject.address, [10, 20, 30, 40], evidenceHash, 7n);
+    await registry.connect(outsider).disputeFeedback(1n, evidenceHash, { value: 5n });
+
+    const contractBefore = await ethers.provider.getBalance(await registry.getAddress());
+    const authorBefore = await ethers.provider.getBalance(author.address);
+    const disputerBefore = await ethers.provider.getBalance(outsider.address);
+
+    await expect(registry.connect(owner).resolveDispute(1n, true))
+      .to.emit(registry, "DisputeResolved")
+      .withArgs(1n, true);
+
+    expect(await registry.getReputation(subject.address)).to.deep.equal([
+      true,
+      1n,
+      10n,
+      20n,
+      30n,
+      40n
+    ]);
+    expect(await ethers.provider.getBalance(await registry.getAddress())).to.equal(contractBefore - 10n);
+    expect(await ethers.provider.getBalance(author.address)).to.equal(authorBefore);
+    expect(await ethers.provider.getBalance(outsider.address)).to.equal(disputerBefore + 10n);
+
+    const slashedFeedback = await registry.getFeedback(1n);
+    expect(slashedFeedback.status).to.equal(3);
+    expect(slashedFeedback.author).to.equal(author.address);
+    expect(slashedFeedback.stake).to.equal(5n);
+    expect((await registry.getFeedback(2n)).status).to.equal(0);
+
+    const nextFeedbackId = await nextId(author, secondSubject.address, [1, 1, 1, 1], evidenceHash, 5n);
+    expect(nextFeedbackId).to.equal(3n);
+  });
+
+  it("reverts a failed payout and leaves dispute, record, and aggregates unchanged", async function () {
+    await registry.connect(owner).setMinStake(5n);
+    await register(author);
+    await submit(author, subject.address, [1, 2, 3, 4], evidenceHash, 5n);
+    await registry.connect(outsider).disputeFeedback(1n, evidenceHash, { value: 5n });
+    const balanceBefore = await ethers.provider.getBalance(await registry.getAddress());
+    await ethers.provider.send("hardhat_setCode", [outsider.address, "0x60006000fd"]);
+
+    await expect(registry.connect(owner).resolveDispute(1n, true))
+      .to.be.revertedWithCustomError(registry, "NativeTransferFailed");
+
+    expect((await registry.getFeedback(1n)).status).to.equal(1);
+    expect(await registry.getReputation(subject.address)).to.deep.equal([
+      true,
+      1n,
+      1n,
+      2n,
+      3n,
+      4n
+    ]);
+    expect(await ethers.provider.getBalance(await registry.getAddress())).to.equal(balanceBefore);
+    await ethers.provider.send("hardhat_setCode", [outsider.address, "0x"]);
   });
 
   it("emits FeedbackSubmitted with the exact signature, indexed fields, and values", async function () {
