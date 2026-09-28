@@ -72,7 +72,12 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
       setConfig(cfg)
       setAgents(agtList)
       setMessages(msgList)
-      setTransactions(txRes.items)
+      setTransactions((prev) => {
+        if (txRes.items.length === 0) return prev
+        const existingIds = new Set(prev.map((t) => t.id))
+        const newItems = txRes.items.filter((t) => !existingIds.has(t.id))
+        return [...prev, ...newItems]
+      })
       setCharterRules(rulesRes)
       setCharterStatus(statusRes)
 
@@ -196,11 +201,19 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
     setIsProcessingAction(true)
     try {
       const res = await api.runAttackSequence({ conversationId: "conv-demo-01" })
-      await loadData()
-      refetchNow()
-      if (res.runs.length > 0 && res.runs[0].attempt) {
-        setSelectedAttempt(res.runs[0].attempt)
+      const newAttempts = res.runs
+        .map((r) => r.attempt)
+        .filter((a): a is TransactionAttempt => a !== null)
+
+      if (newAttempts.length > 0) {
+        setTransactions((prev) => {
+          const existingIds = new Set(prev.map((t) => t.id))
+          const fresh = newAttempts.filter((t) => !existingIds.has(t.id))
+          return [...fresh, ...prev]
+        })
+        setSelectedAttempt(newAttempts[0])
       }
+      refetchNow()
     } catch (err: unknown) {
       setApiError(err instanceof Error ? err.message : "Failed to run attack sequence")
     } finally {
@@ -217,11 +230,14 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
         conversationId: "conv-demo-01",
         attackType,
       })
-      await loadData()
-      refetchNow()
       if (res.attempt) {
+        setTransactions((prev) => {
+          if (prev.some((t) => t.id === res.attempt!.id)) return prev
+          return [res.attempt!, ...prev]
+        })
         setSelectedAttempt(res.attempt)
       }
+      refetchNow()
     } catch (err: unknown) {
       setApiError(err instanceof Error ? err.message : `Failed to execute ${attackType} attack`)
     } finally {
@@ -238,11 +254,14 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
         amountWei: "1500000000000000000", // 1.5 MST
         description: "Requesting payment of 1.5 MST for verified batch inference compute job #8841.",
       })
-      await loadData()
-      refetchNow()
       if (res.attempt) {
+        setTransactions((prev) => {
+          if (prev.some((t) => t.id === res.attempt!.id)) return prev
+          return [res.attempt!, ...prev]
+        })
         setSelectedAttempt(res.attempt)
       }
+      refetchNow()
     } catch (err: unknown) {
       setApiError(err instanceof Error ? err.message : "Failed to submit legitimate offer")
     } finally {
@@ -303,7 +322,7 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
             </div>
             <div className="hidden sm:flex items-center gap-2 text-[10px] text-white/50 shrink-0">
               <Radio className="w-3 h-3 text-[#dfff00]" />
-              <span>CHAIN 1337</span>
+              <span>CHAIN {config?.mstChainId || config?.chainId || "——"}</span>
             </div>
           </div>
         </div>

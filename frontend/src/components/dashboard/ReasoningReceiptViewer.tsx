@@ -115,6 +115,11 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
   const isBlocked = receipt.decisionLabel === "BLOCKED"
   const isExecuted = receipt.decisionLabel === "EXECUTED"
 
+  const signals = rf?.manipulationSignals || []
+  const rationaleText = rf?.rationale || receipt.reasoningSummary
+  const repChecked = rf?.reputationChecked
+  const modelInfo = rf?.model || { provider: "gemini", name: "gemini-2.5-flash", fellBack: false }
+
   return (
     <Card
       className="w-full bg-black border-white/15 shadow-2xl p-5 flex flex-col h-[520px] overflow-hidden rounded-2xl"
@@ -182,8 +187,8 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
             Detected Manipulation Signals
           </span>
           <div className="flex flex-wrap gap-1.5">
-            {rf.manipulationSignals && rf.manipulationSignals.length > 0 ? (
-              rf.manipulationSignals.map((signal, idx) => (
+            {signals.length > 0 ? (
+              signals.map((signal, idx) => (
                 <Badge key={idx} variant="red" className="text-[10px] py-0.5 px-2 gap-1">
                   <AlertOctagon className="w-3 h-3 text-[#dfff00]" />
                   {signal}
@@ -203,7 +208,7 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
             Agent Rationale
           </span>
           <p className="text-xs text-white/80 leading-relaxed">
-            {rf.rationale}
+            {rationaleText}
           </p>
         </div>
 
@@ -213,14 +218,14 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
           {/* Reputation Check */}
           <div className="p-3 bg-[#0a0a0a] border border-white/12 rounded-xl space-y-1">
             <span className="text-[10px] text-white/50 uppercase block">Reputation Verification</span>
-            {rf.reputationChecked.enabled ? (
+            {repChecked?.enabled ? (
               <div className="space-y-1 text-[11px]">
-                <div className="text-white">Feedback Count: {rf.reputationChecked.feedbackCount}</div>
+                <div className="text-white">Feedback Count: {repChecked.feedbackCount}</div>
                 <div className="grid grid-cols-2 gap-1 text-[10px] text-white/70">
-                  <span>Comp: {rf.reputationChecked.axes.competence ?? "NO DATA"}</span>
-                  <span>Hon: {rf.reputationChecked.axes.honesty ?? "NO DATA"}</span>
-                  <span>Compl: {rf.reputationChecked.axes.compliance ?? "NO DATA"}</span>
-                  <span>Rel: {rf.reputationChecked.axes.reliability ?? "NO DATA"}</span>
+                  <span>Comp: {repChecked.axes?.competence ?? "NO DATA"}</span>
+                  <span>Hon: {repChecked.axes?.honesty ?? "NO DATA"}</span>
+                  <span>Compl: {repChecked.axes?.compliance ?? "NO DATA"}</span>
+                  <span>Rel: {repChecked.axes?.reliability ?? "NO DATA"}</span>
                 </div>
               </div>
             ) : (
@@ -233,9 +238,9 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
             <span className="text-[10px] text-white/50 uppercase block">AI Model Metadata</span>
             <div className="flex items-center gap-1.5 font-bold text-white">
               <Cpu className="w-3.5 h-3.5 text-[#dfff00]" />
-              <span>{rf.model.provider.toUpperCase()} ({rf.model.name})</span>
+              <span>{modelInfo.provider.toUpperCase()} ({modelInfo.name})</span>
             </div>
-            {rf.model.fellBack && (
+            {modelInfo.fellBack && (
               <Badge variant="cyan" className="text-[9px] py-0 px-1 mt-1">
                 FELL BACK TO OLLAMA
               </Badge>

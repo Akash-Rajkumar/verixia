@@ -239,7 +239,9 @@ export interface AttackResult {
 
 export interface PublicConfig {
   chainId: number
+  mstChainId?: string | number
   explorerUrl: string
+  mstExplorerUrl?: string
   contracts: {
     SpendingCharter: string
     ReputationRegistry: string

@@ -100,7 +100,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           {/* Chain Badge */}
           <Badge variant="neutral" className="gap-1">
             <Database className="w-3 h-3 text-[#dfff00]" />
-            MST • CHAIN {config?.chainId || 1337}
+            MST • CHAIN {config?.mstChainId || config?.chainId || "——"}
           </Badge>
 
           {/* Model Provider Badge */}

@@ -405,17 +405,27 @@ export class ApiClient {
     limit?: number
     cursor?: string
   }): Promise<{ items: TransactionAttempt[]; nextCursor: string | null }> {
-    const query = new URLSearchParams()
-    if (params?.status) query.set("status", params.status)
-    if (params?.agentId) query.set("agentId", params.agentId)
-    if (params?.conversationId) query.set("conversationId", params.conversationId)
-    if (params?.limit) query.set("limit", params.limit.toString())
-    if (params?.cursor) query.set("cursor", params.cursor)
+    try {
+      const query = new URLSearchParams()
+      if (params?.status) query.set("status", params.status)
+      if (params?.agentId) query.set("agentId", params.agentId)
+      if (params?.conversationId) query.set("conversationId", params.conversationId)
+      if (params?.limit) query.set("limit", params.limit.toString())
+      if (params?.cursor) query.set("cursor", params.cursor)
 
-    const queryString = query.toString() ? `?${query.toString()}` : ""
-    return this.request<{ items: TransactionAttempt[]; nextCursor: string | null }>(
-      `/transactions${queryString}`
-    )
+      const queryString = query.toString() ? `?${query.toString()}` : ""
+      return await this.request<{ items: TransactionAttempt[]; nextCursor: string | null }>(
+        `/transactions${queryString}`
+      )
+    } catch (err) {
+      if (
+        err instanceof ApiError &&
+        (err.code === "NOT_IMPLEMENTED" || err.message.includes("not implemented"))
+      ) {
+        return { items: [], nextCursor: null }
+      }
+      throw err
+    }
   }
 
   async getTransaction(attemptId: string): Promise<TransactionAttempt> {
@@ -443,23 +453,60 @@ export class ApiClient {
 
   // REPUTATION
   async getReputation(): Promise<Reputation[]> {
-    return this.request<Reputation[]>("/reputation")
+    try {
+      return await this.request<Reputation[]>("/reputation")
+    } catch (err) {
+      if (
+        err instanceof ApiError &&
+        (err.code === "NOT_IMPLEMENTED" || err.message.includes("not implemented"))
+      ) {
+        return []
+      }
+      throw err
+    }
   }
 
   async getReputationByAddress(address: string): Promise<Reputation> {
-    return this.request<Reputation>(`/reputation/${address}`)
+    try {
+      return await this.request<Reputation>(`/reputation/${address}`)
+    } catch (err) {
+      if (
+        err instanceof ApiError &&
+        (err.code === "NOT_IMPLEMENTED" || err.message.includes("not implemented"))
+      ) {
+        return {
+          address,
+          registered: false,
+          feedbackCount: 0,
+          axes: { competence: null, honesty: null, compliance: null, reliability: null },
+          syncedAt: new Date().toISOString(),
+          source: "chain",
+        }
+      }
+      throw err
+    }
   }
 
   async getReputationFeedback(params?: {
     address?: string
     limit?: number
   }): Promise<FeedbackEvent[]> {
-    const query = new URLSearchParams()
-    if (params?.address) query.set("address", params.address)
-    if (params?.limit) query.set("limit", params.limit.toString())
+    try {
+      const query = new URLSearchParams()
+      if (params?.address) query.set("address", params.address)
+      if (params?.limit) query.set("limit", params.limit.toString())
 
-    const queryString = query.toString() ? `?${query.toString()}` : ""
-    return this.request<FeedbackEvent[]>(`/reputation/feedback${queryString}`)
+      const queryString = query.toString() ? `?${query.toString()}` : ""
+      return await this.request<FeedbackEvent[]>(`/reputation/feedback${queryString}`)
+    } catch (err) {
+      if (
+        err instanceof ApiError &&
+        (err.code === "NOT_IMPLEMENTED" || err.message.includes("not implemented"))
+      ) {
+        return []
+      }
+      throw err
+    }
   }
 
   async submitReputationFeedback(payload: {
@@ -504,20 +551,30 @@ export class ApiClient {
       createdAt: string
     }[]
   > {
-    const query = new URLSearchParams()
-    if (params?.sinceId) query.set("sinceId", params.sinceId)
-    if (params?.limit) query.set("limit", params.limit.toString())
+    try {
+      const query = new URLSearchParams()
+      if (params?.sinceId) query.set("sinceId", params.sinceId)
+      if (params?.limit) query.set("limit", params.limit.toString())
 
-    const queryString = query.toString() ? `?${query.toString()}` : ""
-    return this.request<
-      {
-        id: string
-        type: string
-        entityId: string
-        payload: unknown
-        createdAt: string
-      }[]
-    >(`/events${queryString}`)
+      const queryString = query.toString() ? `?${query.toString()}` : ""
+      return await this.request<
+        {
+          id: string
+          type: string
+          entityId: string
+          payload: unknown
+          createdAt: string
+        }[]
+      >(`/events${queryString}`)
+    } catch (err) {
+      if (
+        err instanceof ApiError &&
+        (err.code === "NOT_IMPLEMENTED" || err.message.includes("not implemented"))
+      ) {
+        return []
+      }
+      throw err
+    }
   }
 }
 
