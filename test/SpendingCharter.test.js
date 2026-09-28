@@ -64,6 +64,23 @@ describe("SpendingCharter", function () {
     expect(await charter.agent()).to.equal(recipient.address);
   });
 
+  it("allows only the owner to approve payments", async function () {
+    await expect(charter.connect(outsider).approvePayment(recipient.address, 40n))
+      .to.be.revertedWith("Ownable: caller is not the owner");
+  });
+
+  it("emits the exact PaymentApproved event and stores a matching approval", async function () {
+    const event = charter.interface.getEvent("PaymentApproved");
+    expect(event.format("sighash")).to.equal("PaymentApproved(address,uint256)");
+    expect(event.inputs.map((input) => input.indexed)).to.deep.equal([true, false]);
+    expect(await charter.isApproved(recipient.address, 40n)).to.equal(false);
+
+    await expect(charter.connect(owner).approvePayment(recipient.address, 40n))
+      .to.emit(charter, "PaymentApproved")
+      .withArgs(recipient.address, 40n);
+    expect(await charter.isApproved(recipient.address, 40n)).to.equal(true);
+  });
+
   it("allows only the owner to set counterparty status and emits the exact event", async function () {
     await expect(charter.connect(outsider).setCounterpartyStatus(recipient.address, 1))
       .to.be.revertedWith("Ownable: caller is not the owner");
@@ -191,6 +208,156 @@ describe("SpendingCharter", function () {
   it("returns reason 5 above the threshold before insufficient balance", async function () {
     expect(await charter.checkPayment.staticCall(recipient.address, HUMAN_THRESHOLD + 1n))
       .to.deep.equal([false, constants.reasonCodes.REQUIRES_HUMAN_APPROVAL]);
+  });
+
+  it("executes an approved payment with a new receipt ID after the blocked attempt", async function () {
+    const paymentAmount = HUMAN_THRESHOLD + 1n;
+    const blockedReceiptId = ethers.id("approval-blocked-attempt");
+    const retryReceiptId = ethers.id("approval-retry-attempt");
+    await charter.connect(owner).fund({ value: 100n });
+
+    await expect(charter.connect(agent).attemptPayment(recipient.address, paymentAmount, blockedReceiptId))
+      .to.emit(charter, "PaymentBlocked")
+      .withArgs(blockedReceiptId, recipient.address, paymentAmount, constants.reasonCodes.REQUIRES_HUMAN_APPROVAL);
+
+    await charter.connect(owner).approvePayment(recipient.address, paymentAmount);
+    expect(await charter.isApproved(recipient.address, paymentAmount)).to.equal(true);
+    expect(await charter.checkPayment.staticCall(recipient.address, paymentAmount))
+      .to.deep.equal([true, constants.reasonCodes.OK]);
+    expect(await charter.isApproved(recipient.address, paymentAmount)).to.equal(true);
+
+    await expect(charter.connect(agent).attemptPayment(recipient.address, paymentAmount, retryReceiptId))
+      .to.emit(charter, "PaymentExecuted")
+      .withArgs(retryReceiptId, recipient.address, paymentAmount, paymentAmount);
+    expect(await charter.isApproved(recipient.address, paymentAmount)).to.equal(false);
+  });
+
+  it("consumes a matching approval after success so a second payment blocks", async function () {
+    const paymentAmount = HUMAN_THRESHOLD + 1n;
+    await charter.connect(owner).fund({ value: 100n });
+    await charter.connect(owner).approvePayment(recipient.address, paymentAmount);
+
+    await charter.connect(agent).attemptPayment(
+      recipient.address,
+      paymentAmount,
+      ethers.id("first-approved-payment")
+    );
+    expect(await charter.isApproved(recipient.address, paymentAmount)).to.equal(false);
+
+    expect(await charter.connect(agent).attemptPayment.staticCall(
+      recipient.address,
+      paymentAmount,
+      ethers.id("second-unapproved-payment")
+    )).to.deep.equal([false, constants.reasonCodes.REQUIRES_HUMAN_APPROVAL]);
+  });
+
+  it("does not let an approval bypass the max-per-transaction rule", async function () {
+    const paymentAmount = HUMAN_THRESHOLD + 1n;
+    await setRules({ maxPerTx: HUMAN_THRESHOLD, dailyCap: DAILY_CAP });
+    await charter.connect(owner).approvePayment(recipient.address, paymentAmount);
+
+    expect(await charter.checkPayment.staticCall(recipient.address, paymentAmount))
+      .to.deep.equal([false, constants.reasonCodes.EXCEEDS_MAX_PER_TX]);
+    expect(await charter.isApproved(recipient.address, paymentAmount)).to.equal(true);
+  });
+
+  it("does not let an approval bypass a denied counterparty", async function () {
+    const paymentAmount = HUMAN_THRESHOLD + 1n;
+    await charter.connect(owner).setCounterpartyStatus(recipient.address, 1);
+    await charter.connect(owner).approvePayment(recipient.address, paymentAmount);
+
+    expect(await charter.checkPayment.staticCall(recipient.address, paymentAmount))
+      .to.deep.equal([false, constants.reasonCodes.COUNTERPARTY_DENIED]);
+    expect(await charter.isApproved(recipient.address, paymentAmount)).to.equal(true);
+  });
+
+  it("does not match approval to a different recipient or amount", async function () {
+    const paymentAmount = HUMAN_THRESHOLD + 1n;
+    await charter.connect(owner).approvePayment(recipient.address, paymentAmount);
+
+    expect(await charter.checkPayment.staticCall(outsider.address, paymentAmount))
+      .to.deep.equal([false, constants.reasonCodes.REQUIRES_HUMAN_APPROVAL]);
+    expect(await charter.checkPayment.staticCall(recipient.address, paymentAmount + 1n))
+      .to.deep.equal([false, constants.reasonCodes.REQUIRES_HUMAN_APPROVAL]);
+    expect(await charter.isApproved(recipient.address, paymentAmount)).to.equal(true);
+    expect(await charter.isApproved(outsider.address, paymentAmount)).to.equal(false);
+    expect(await charter.isApproved(recipient.address, paymentAmount + 1n)).to.equal(false);
+  });
+
+  it("treats duplicate approvals as idempotent and consumes only one boolean approval", async function () {
+    const paymentAmount = HUMAN_THRESHOLD + 1n;
+    await charter.connect(owner).fund({ value: 100n });
+
+    await expect(charter.connect(owner).approvePayment(recipient.address, paymentAmount))
+      .to.emit(charter, "PaymentApproved")
+      .withArgs(recipient.address, paymentAmount);
+    await expect(charter.connect(owner).approvePayment(recipient.address, paymentAmount))
+      .to.emit(charter, "PaymentApproved")
+      .withArgs(recipient.address, paymentAmount);
+    expect(await charter.isApproved(recipient.address, paymentAmount)).to.equal(true);
+
+    await charter.connect(agent).attemptPayment(
+      recipient.address,
+      paymentAmount,
+      ethers.id("single-approved-execution")
+    );
+    expect(await charter.isApproved(recipient.address, paymentAmount)).to.equal(false);
+    expect(await charter.connect(agent).attemptPayment.staticCall(
+      recipient.address,
+      paymentAmount,
+      ethers.id("no-stacked-approval")
+    )).to.deep.equal([false, constants.reasonCodes.REQUIRES_HUMAN_APPROVAL]);
+  });
+
+  it("retains an approval when another rule blocks payment", async function () {
+    const paymentAmount = HUMAN_THRESHOLD + 1n;
+    await charter.connect(owner).setCounterpartyStatus(recipient.address, 1);
+    await charter.connect(owner).approvePayment(recipient.address, paymentAmount);
+
+    expect(await charter.connect(agent).attemptPayment.staticCall(
+      recipient.address,
+      paymentAmount,
+      ethers.id("denied-approved-payment")
+    )).to.deep.equal([false, constants.reasonCodes.COUNTERPARTY_DENIED]);
+    await charter.connect(agent).attemptPayment(
+      recipient.address,
+      paymentAmount,
+      ethers.id("denied-approved-payment")
+    );
+    expect(await charter.isApproved(recipient.address, paymentAmount)).to.equal(true);
+  });
+
+  it("leaves an approval in place when a transfer fails", async function () {
+    const paymentAmount = HUMAN_THRESHOLD + 1n;
+    await charter.connect(owner).fund({ value: 100n });
+    await charter.connect(owner).approvePayment(recipient.address, paymentAmount);
+    await ethers.provider.send("hardhat_setCode", [recipient.address, "0x60006000fd"]);
+
+    await expect(charter.connect(agent).attemptPayment(
+      recipient.address,
+      paymentAmount,
+      ethers.id("failed-approved-payment")
+    )).to.be.revertedWith("SpendingCharter: transfer failed");
+
+    expect(await charter.isApproved(recipient.address, paymentAmount)).to.equal(true);
+    expect(await charter.getDailySpent()).to.equal(0n);
+    expect(await charter.getBalance()).to.equal(100n);
+    await ethers.provider.send("hardhat_setCode", [recipient.address, "0x"]);
+  });
+
+  it("allows approvals at or below threshold and leaves them unconsumed", async function () {
+    const paymentAmount = HUMAN_THRESHOLD;
+    await charter.connect(owner).fund({ value: 100n });
+    await charter.connect(owner).approvePayment(recipient.address, paymentAmount);
+
+    expect(await charter.checkPayment.staticCall(recipient.address, paymentAmount))
+      .to.deep.equal([true, constants.reasonCodes.OK]);
+    await charter.connect(agent).attemptPayment(
+      recipient.address,
+      paymentAmount,
+      ethers.id("threshold-approval-unused")
+    );
+    expect(await charter.isApproved(recipient.address, paymentAmount)).to.equal(true);
   });
 
   it("checks insufficient balance at the exact human-approval threshold", async function () {
