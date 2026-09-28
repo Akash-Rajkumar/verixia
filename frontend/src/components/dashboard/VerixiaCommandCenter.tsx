@@ -470,9 +470,9 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
                                 🛡 BLOCKED BY SPENDING CHARTER
                               </span>
                               <span className="text-[10px] font-mono text-white/70 block">
-                                {heroAttempt.blockReasonCode !== null
+                                {heroAttempt.blockReasonCode !== null && heroAttempt.blockReasonCode !== undefined && heroAttempt.blockReasonCode !== 0
                                   ? REASON_CODE_LABELS[heroAttempt.blockReasonCode] || `CODE_${heroAttempt.blockReasonCode}`
-                                  : "POLICY_VIOLATION"}
+                                  : "EXCEEDS_MAX_PER_TX"}
                               </span>
                             </div>
                           )}
@@ -507,9 +507,9 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
                           </span>
                           <p className="text-xs font-sans text-white/90 leading-relaxed">
                             {heroAttempt.status === "blocked"
-                              ? (heroAttempt.blockReasonCode !== null
+                              ? (heroAttempt.blockReasonCode !== null && heroAttempt.blockReasonCode !== undefined && heroAttempt.blockReasonCode !== 0
                                   ? REASON_CODE_HUMAN_TEXT[heroAttempt.blockReasonCode] || heroAttempt.blockReason
-                                  : "Spending Charter policy limit was exceeded.")
+                                  : "Per-transaction spending limit exceeded.")
                               : heroAttempt.status === "executed"
                               ? "Requested amount is within the maximum per-transaction limit and daily spending cap."
                               : "Sentinel agent reasoning engine declined the transaction proposal."}

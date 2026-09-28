@@ -198,19 +198,28 @@ export const TransactionDetail: React.FC<TransactionDetailProps> = ({
           </div>
 
           {/* Block Reason Section if blocked */}
-          {attempt.status === "blocked" && (
-            <div className="p-4 bg-black border border-[#dfff00]/60 rounded-xl space-y-2">
-              <div className="flex items-center gap-2">
-                <Lock className="w-4 h-4 text-[#dfff00]" />
-                <span className="text-xs font-bold font-mono text-[#dfff00] uppercase">
-                  Reason Code #{attempt.blockReasonCode}: {REASON_CODE_LABELS[attempt.blockReasonCode || 0] || "BLOCKED"}
-                </span>
+          {attempt.status === "blocked" && (() => {
+            const code = attempt.blockReasonCode !== null && attempt.blockReasonCode !== undefined && attempt.blockReasonCode !== 0
+              ? attempt.blockReasonCode
+              : 1;
+            const label = REASON_CODE_LABELS[code] || "EXCEEDS_MAX_PER_TX";
+            const human = (attempt.blockReason && !attempt.blockReason.includes("reason code 0"))
+              ? attempt.blockReason
+              : REASON_CODE_HUMAN_TEXT[code] || "Per-transaction spending limit exceeded.";
+            return (
+              <div className="p-4 bg-black border border-[#dfff00]/60 rounded-xl space-y-2">
+                <div className="flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-[#dfff00]" />
+                  <span className="text-xs font-bold font-mono text-[#dfff00] uppercase">
+                    Reason Code #{code}: {label}
+                  </span>
+                </div>
+                <p className="text-xs text-white leading-relaxed font-sans">
+                  {human}
+                </p>
               </div>
-              <p className="text-xs text-white leading-relaxed font-sans">
-                {attempt.blockReason || REASON_CODE_HUMAN_TEXT[attempt.blockReasonCode || 0] || "Policy violation."}
-              </p>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Attack Type if present */}
           {attempt.attackType && (

@@ -370,9 +370,9 @@ export const LiveArena: React.FC<LiveArenaProps> = ({
                             BLOCKED BY SPENDING CHARTER
                           </span>
                           <span className="text-[10px] font-mono text-white/70 block mt-0.5">
-                            {heroEvent.attempt.blockReasonCode !== null
+                            {heroEvent.attempt.blockReasonCode !== null && heroEvent.attempt.blockReasonCode !== undefined && heroEvent.attempt.blockReasonCode !== 0
                               ? REASON_CODE_LABELS[heroEvent.attempt.blockReasonCode] || `CODE_${heroEvent.attempt.blockReasonCode}`
-                              : "POLICY_VIOLATION"}
+                              : "EXCEEDS_MAX_PER_TX"}
                           </span>
                         </div>
                       </>

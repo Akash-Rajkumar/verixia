@@ -159,7 +159,7 @@ export const ExplainerStrip: React.FC<ExplainerStripProps> = ({ selectedAttempt 
                 }`}
               >
                 {isBlocked
-                  ? `BLOCKED (${REASON_CODE_LABELS[selectedAttempt?.blockReasonCode || 0] || "CHARTER"})`
+                  ? `BLOCKED (${REASON_CODE_LABELS[(selectedAttempt?.blockReasonCode !== null && selectedAttempt?.blockReasonCode !== undefined && selectedAttempt?.blockReasonCode !== 0) ? selectedAttempt.blockReasonCode : 1] || "EXCEEDS_MAX_PER_TX"})`
                   : isExecuted
                   ? "EXECUTED ON-CHAIN"
                   : isDeclined

@@ -128,7 +128,10 @@ export const CharterPanel: React.FC<CharterPanelProps> = ({
           <div className="flex items-center justify-between text-xs font-mono">
             <div className="flex items-center gap-2 text-[#dfff00] font-bold">
               <ShieldAlert className="w-4 h-4 text-[#dfff00] animate-pulse" />
-              <span>CHARTER REJECTED: #{selectedAttempt.blockReasonCode} {REASON_CODE_LABELS[selectedAttempt.blockReasonCode || 0]}</span>
+              <span>
+                CHARTER REJECTED: #{selectedAttempt.blockReasonCode !== null && selectedAttempt.blockReasonCode !== undefined && selectedAttempt.blockReasonCode !== 0 ? selectedAttempt.blockReasonCode : 1}{" "}
+                {REASON_CODE_LABELS[selectedAttempt.blockReasonCode && selectedAttempt.blockReasonCode !== 0 ? selectedAttempt.blockReasonCode : 1] || "EXCEEDS_MAX_PER_TX"}
+              </span>
             </div>
             <span className="text-[#dfff00] font-bold">
               Attempt: {formatNativeAmount(selectedAttempt.amountWei, 18, "MST")}
@@ -136,7 +139,9 @@ export const CharterPanel: React.FC<CharterPanelProps> = ({
           </div>
 
           <p className="text-xs text-white/80 font-sans">
-            {selectedAttempt.blockReason || REASON_CODE_HUMAN_TEXT[selectedAttempt.blockReasonCode || 0]}
+            {selectedAttempt.blockReason && !selectedAttempt.blockReason.includes("reason code 0")
+              ? selectedAttempt.blockReason
+              : REASON_CODE_HUMAN_TEXT[selectedAttempt.blockReasonCode && selectedAttempt.blockReasonCode !== 0 ? selectedAttempt.blockReasonCode : 1] || "Per-transaction spending limit exceeded"}
           </p>
 
           {/* Visual Boundary Line Crossing Animation */}

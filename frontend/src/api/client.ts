@@ -302,6 +302,11 @@ export class ApiClient {
         ? "executed"
         : "declined"
 
+      const rawReason = item.defense?.charterReasonCode
+      const reasonCode = (rawReason !== undefined && rawReason !== null && rawReason !== 0)
+        ? rawReason
+        : (isBlocked ? 1 : 0)
+
       const attempt: TransactionAttempt | null = item.defense
         ? {
             id: item.defense.attemptId || item.defense.turnId || `att-${idx}`,
@@ -311,7 +316,7 @@ export class ApiClient {
             counterpartyAddress: item.defense.counterparty || "0x9999999999999999999999999999999999999999",
             amountWei: item.defense.amountWei || "500000000000000000",
             status: attemptStatus,
-            blockReasonCode: item.defense.charterReasonCode ?? null,
+            blockReasonCode: isBlocked ? reasonCode : null,
             blockReason: item.defense.replyText || null,
             txHash: item.defense.txHash || null,
             chainId: 91562037,
@@ -321,7 +326,7 @@ export class ApiClient {
             reputationSnapshot: null,
             charterPrecheck: {
               ok: !isBlocked,
-              reasonCode: item.defense.charterReasonCode || 0,
+              reasonCode: reasonCode,
             },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),

@@ -168,16 +168,23 @@ export const TransactionLedger: React.FC<TransactionLedgerProps> = ({
                         </p>
 
                         {/* Line 3: Exact Reason Code & Sentence for Blocked */}
-                        {isBlocked && (
-                          <div className="mt-1 pt-1 border-t border-white/10 text-[11px] font-mono text-[#dfff00]">
-                            <span className="font-bold">
-                              #{attempt.blockReasonCode} {REASON_CODE_LABELS[attempt.blockReasonCode || 0]}:
-                            </span>{" "}
-                            <span>
-                              {attempt.blockReason || REASON_CODE_HUMAN_TEXT[attempt.blockReasonCode || 0]}
-                            </span>
-                          </div>
-                        )}
+                        {isBlocked && (() => {
+                          const code = attempt.blockReasonCode !== null && attempt.blockReasonCode !== undefined && attempt.blockReasonCode !== 0
+                            ? attempt.blockReasonCode
+                            : 1;
+                          const label = REASON_CODE_LABELS[code] || "EXCEEDS_MAX_PER_TX";
+                          const human = (attempt.blockReason && !attempt.blockReason.includes("reason code 0"))
+                            ? attempt.blockReason
+                            : REASON_CODE_HUMAN_TEXT[code] || "Per-transaction spending limit exceeded";
+                          return (
+                            <div className="mt-1 pt-1 border-t border-white/10 text-[11px] font-mono text-[#dfff00]">
+                              <span className="font-bold">
+                                #{code} {label}:
+                              </span>{" "}
+                              <span>{human}</span>
+                            </div>
+                          );
+                        })()}
 
                         {/* Line 3 for Declined */}
                         {isDeclined && (
