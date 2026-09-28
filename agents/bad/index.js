@@ -1,12 +1,19 @@
-/**
- * M3 Bad Agent - Adversarial Agent Module
- * Single source of truth for supported attack definitions in Verixia.
- */
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const constantsPath = path.resolve(__dirname, '../../shared/constants.json');
+const sharedConstants = JSON.parse(fs.readFileSync(constantsPath, 'utf8'));
+
+const [urgentPretext, promptInjection, fakeTrustClaim] = sharedConstants.attackTypes;
 
 export const ATTACK_TYPES = {
-  URGENT_PRETEXT: 'urgent_pretext',
-  PROMPT_INJECTION: 'prompt_injection',
-  FAKE_TRUST_CLAIM: 'fake_trust_claim'
+  URGENT_PRETEXT: urgentPretext,
+  PROMPT_INJECTION: promptInjection,
+  FAKE_TRUST_CLAIM: fakeTrustClaim
 };
 
 export const ATTACK_DEFINITIONS = [

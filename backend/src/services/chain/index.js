@@ -32,13 +32,28 @@ export function getDeploymentConfig() {
   return null;
 }
 
+export function getCharterAbi() {
+  const abiPath = path.resolve(__dirname, '../../../../shared/abi/SpendingCharter.json');
+  if (fs.existsSync(abiPath)) {
+    try {
+      const content = fs.readFileSync(abiPath, 'utf8');
+      return JSON.parse(content);
+    } catch (err) {
+      console.warn('Failed to read SpendingCharter ABI:', err.message);
+    }
+  }
+  return null;
+}
+
 export function getChainStatus() {
   const rpcConfigured = Boolean(process.env.MST_RPC_URL);
   const deploymentConfig = getDeploymentConfig();
+  const charterAbi = getCharterAbi();
   return {
     configured: rpcConfigured,
     rpcUrl: rpcConfigured ? process.env.MST_RPC_URL : null,
     chainId: process.env.MST_CHAIN_ID || null,
-    hasDeploymentFile: Boolean(deploymentConfig)
+    hasDeploymentFile: Boolean(deploymentConfig),
+    hasCharterAbi: Boolean(charterAbi)
   };
 }
