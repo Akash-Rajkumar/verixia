@@ -33,7 +33,7 @@ export class ApiClient {
     const rawUrl =
       baseUrl ||
       (import.meta.env.VITE_API_BASE_URL as string) ||
-      "http://localhost:3000"
+      "http://localhost:4000/api/v1"
     // Normalize base URL without trailing slash
     const cleanUrl = rawUrl.replace(/\/$/, "")
     this.baseUrl = cleanUrl.endsWith("/api/v1")
