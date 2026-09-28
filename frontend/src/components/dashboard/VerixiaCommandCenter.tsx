@@ -3,11 +3,14 @@ import { ShieldCheck, AlertTriangle, RefreshCw, Layers } from "lucide-react"
 import { TopBar } from "./TopBar"
 import { LiveArena } from "./LiveArena"
 import { DemoControls } from "./DemoControls"
+import { TransactionLedger } from "./TransactionLedger"
+import { CharterPanel } from "./CharterPanel"
+import { TransactionDetail } from "./TransactionDetail"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useLiveFeed } from "@/hooks/useLiveFeed"
 import { api } from "@/api"
-import type { Agent, Message, PublicConfig, TransactionAttempt } from "@/api/types"
+import type { Agent, CharterRules, CharterStatus, Message, PublicConfig, TransactionAttempt } from "@/api/types"
 
 export const VerixiaCommandCenter: React.FC = () => {
   const { connectionMode, refreshSignal, refetchNow } = useLiveFeed()
@@ -16,6 +19,11 @@ export const VerixiaCommandCenter: React.FC = () => {
   const [agents, setAgents] = useState<Agent[]>([])
   const [messages, setMessages] = useState<Message[]>([])
   const [transactions, setTransactions] = useState<TransactionAttempt[]>([])
+  const [charterRules, setCharterRules] = useState<CharterRules | null>(null)
+  const [charterStatus, setCharterStatus] = useState<CharterStatus | null>(null)
+
+  const [selectedAttempt, setSelectedAttempt] = useState<TransactionAttempt | null>(null)
+  const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false)
 
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [isProcessingAction, setIsProcessingAction] = useState<boolean>(false)
@@ -25,24 +33,33 @@ export const VerixiaCommandCenter: React.FC = () => {
   const loadData = useCallback(async () => {
     try {
       setApiError(null)
-      const [cfg, agtList, msgList, txRes] = await Promise.all([
+      const [cfg, agtList, msgList, txRes, rulesRes, statusRes] = await Promise.all([
         api.getPublicConfig(),
         api.getAgents(),
         api.getConversationMessages("conv-demo-01"),
         api.getTransactions({ limit: 50 }),
+        api.getCharterRules(),
+        api.getCharterStatus(),
       ])
 
       setConfig(cfg)
       setAgents(agtList)
       setMessages(msgList)
       setTransactions(txRes.items)
+      setCharterRules(rulesRes)
+      setCharterStatus(statusRes)
+
+      // Auto-select first transaction if none selected
+      if (!selectedAttempt && txRes.items.length > 0) {
+        setSelectedAttempt(txRes.items[0])
+      }
     } catch (err: unknown) {
       console.error("Failed to load command center data:", err)
       setApiError(err instanceof Error ? err.message : "Failed to load dashboard data")
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [selectedAttempt])
 
   // Initial boot load & refetch when live feed signal triggers
   useEffect(() => {
@@ -74,13 +91,22 @@ export const VerixiaCommandCenter: React.FC = () => {
     return { blocked, declined, succeeded }
   }, [transactions])
 
+  // Handle selecting transaction row
+  const handleSelectAttempt = (attempt: TransactionAttempt) => {
+    setSelectedAttempt(attempt)
+    setIsDetailOpen(true)
+  }
+
   // ACTION HANDLERS
   const handleRunSequence = async () => {
     setIsProcessingAction(true)
     try {
-      await api.runAttackSequence({ conversationId: "conv-demo-01" })
+      const res = await api.runAttackSequence({ conversationId: "conv-demo-01" })
       await loadData()
       refetchNow()
+      if (res.runs.length > 0 && res.runs[0].attempt) {
+        setSelectedAttempt(res.runs[0].attempt)
+      }
     } catch (err: unknown) {
       setApiError(err instanceof Error ? err.message : "Failed to run attack sequence")
     } finally {
@@ -93,12 +119,15 @@ export const VerixiaCommandCenter: React.FC = () => {
   ) => {
     setIsProcessingAction(true)
     try {
-      await api.runBadAgentAttack({
+      const res = await api.runBadAgentAttack({
         conversationId: "conv-demo-01",
         attackType,
       })
       await loadData()
       refetchNow()
+      if (res.attempt) {
+        setSelectedAttempt(res.attempt)
+      }
     } catch (err: unknown) {
       setApiError(err instanceof Error ? err.message : `Failed to execute ${attackType} attack`)
     } finally {
@@ -109,7 +138,7 @@ export const VerixiaCommandCenter: React.FC = () => {
   const handleLegitimateOffer = async () => {
     setIsProcessingAction(true)
     try {
-      await api.createCounterpartyOffer({
+      const res = await api.createCounterpartyOffer({
         conversationId: "conv-demo-01",
         counterpartyAgentId: "agent-vendor-01",
         amountWei: "1500000000000000000", // 1.5 MST
@@ -117,6 +146,9 @@ export const VerixiaCommandCenter: React.FC = () => {
       })
       await loadData()
       refetchNow()
+      if (res.attempt) {
+        setSelectedAttempt(res.attempt)
+      }
     } catch (err: unknown) {
       setApiError(err instanceof Error ? err.message : "Failed to submit legitimate offer")
     } finally {
@@ -194,13 +226,42 @@ export const VerixiaCommandCenter: React.FC = () => {
           />
         </section>
 
-        {/* Placeholder Slot for Phase 12-16 Panels */}
+        {/* Phase 12 & Phase 13: Transaction Ledger + Charter Panel Grid */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+          {/* Phase 12: Transaction Ledger */}
+          <TransactionLedger
+            transactions={transactions}
+            selectedAttemptId={selectedAttempt?.id}
+            onSelectAttempt={handleSelectAttempt}
+            isLoading={false}
+            error={null}
+            onRetry={loadData}
+          />
+
+          {/* Phase 13: Spending Charter Panel */}
+          <CharterPanel
+            rules={charterRules}
+            status={charterStatus}
+            selectedAttempt={selectedAttempt}
+          />
+        </section>
+
+        {/* Placeholder Slot for Phase 14-16 Panels */}
         <section className="w-full p-4 border border-dashed border-slate-800 rounded-xl bg-slate-950/40 text-center text-slate-400 text-xs font-mono flex items-center justify-center gap-2">
           <Layers className="w-4 h-4 text-cyan-500" />
-          <span>Additional Command Panels (Transaction Ledger, Charter Panel, Reputation Panel, Reasoning Receipt Viewer) slot ready for next phase.</span>
+          <span>Additional Command Panels (Reputation Panel, Reasoning Receipt Viewer, Explainer Strip) slot ready for next phase.</span>
         </section>
 
       </main>
+
+      {/* Transaction Detail Modal Inspection Drawer */}
+      {isDetailOpen && selectedAttempt && (
+        <TransactionDetail
+          attempt={selectedAttempt}
+          config={config}
+          onClose={() => setIsDetailOpen(false)}
+        />
+      )}
 
       {/* Footer */}
       <footer className="w-full border-t border-slate-800/80 bg-slate-950 py-3 text-center text-[11px] font-mono text-slate-400">
