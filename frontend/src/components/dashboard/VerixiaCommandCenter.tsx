@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react"
-import { ShieldCheck, AlertTriangle, RefreshCw, Layers } from "lucide-react"
+import { ShieldCheck, AlertTriangle, RefreshCw } from "lucide-react"
 import { TopBar } from "./TopBar"
 import { LiveArena } from "./LiveArena"
 import { DemoControls } from "./DemoControls"
 import { TransactionLedger } from "./TransactionLedger"
 import { CharterPanel } from "./CharterPanel"
+import { ReputationPanel } from "./ReputationPanel"
+import { ReasoningReceiptViewer } from "./ReasoningReceiptViewer"
 import { TransactionDetail } from "./TransactionDetail"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -22,6 +24,7 @@ export const VerixiaCommandCenter: React.FC = () => {
   const [charterRules, setCharterRules] = useState<CharterRules | null>(null)
   const [charterStatus, setCharterStatus] = useState<CharterStatus | null>(null)
 
+  // PHASE 16: Centralized single-source-of-truth selectedAttempt state
   const [selectedAttempt, setSelectedAttempt] = useState<TransactionAttempt | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false)
 
@@ -226,7 +229,7 @@ export const VerixiaCommandCenter: React.FC = () => {
           />
         </section>
 
-        {/* Phase 12 & Phase 13: Transaction Ledger + Charter Panel Grid */}
+        {/* Phase 12 & Phase 13: Transaction Ledger + Charter Panel Grid Row */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
           {/* Phase 12: Transaction Ledger */}
           <TransactionLedger
@@ -246,10 +249,19 @@ export const VerixiaCommandCenter: React.FC = () => {
           />
         </section>
 
-        {/* Placeholder Slot for Phase 14-16 Panels */}
-        <section className="w-full p-4 border border-dashed border-slate-800 rounded-xl bg-slate-950/40 text-center text-slate-400 text-xs font-mono flex items-center justify-center gap-2">
-          <Layers className="w-4 h-4 text-cyan-500" />
-          <span>Additional Command Panels (Reputation Panel, Reasoning Receipt Viewer, Explainer Strip) slot ready for next phase.</span>
+        {/* Phase 14 & Phase 15: Reputation Panel + Reasoning Receipt Viewer Grid Row */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+          {/* Phase 14: Reputation Panel */}
+          <ReputationPanel
+            config={config}
+            selectedAttempt={selectedAttempt}
+          />
+
+          {/* Phase 15: Reasoning Receipt Viewer */}
+          <ReasoningReceiptViewer
+            config={config}
+            selectedAttempt={selectedAttempt}
+          />
         </section>
 
       </main>
