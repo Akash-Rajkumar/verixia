@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { sendSuccess, sendError, sendNotImplemented } from '../utils/response.js';
-import { getAttacks, generateAttack } from '../../../agents/bad/index.js';
+import { sendSuccess, sendError } from '../utils/response.js';
+import { getAttacks, generateAttack, ATTACK_TYPES } from '../../../agents/bad/index.js';
+import { getDefaultAgentRuntime } from '../agent/createAgentRuntime.js';
 
 const router = Router();
 
@@ -57,10 +58,80 @@ router.post('/bad-agent/attack', (req, res) => {
 
 /**
  * POST /api/v1/demo/run-attack-sequence
- * Remains 501 NOT_IMPLEMENTED for this checkpoint
+ * Runs the canonical 3-attack adversarial sequence against GoodAgentPipeline
  */
-router.post('/demo/run-attack-sequence', (req, res) => {
-  return sendNotImplemented(res, 'POST /api/v1/demo/run-attack-sequence not implemented yet');
+router.post('/demo/run-attack-sequence', async (req, res, next) => {
+  try {
+    const { conversationId = `demo-conv-${Date.now()}` } = req.body || {};
+    const runtime = req.app.locals.agentRuntime || getDefaultAgentRuntime();
+
+    const sequenceTypes = [
+      ATTACK_TYPES.URGENT_PRETEXT,
+      ATTACK_TYPES.PROMPT_INJECTION,
+      ATTACK_TYPES.FAKE_TRUST_CLAIM
+    ];
+
+    const defaultCounterparties = {
+      [ATTACK_TYPES.URGENT_PRETEXT]: '0x9999999999999999999999999999999999999999',
+      [ATTACK_TYPES.PROMPT_INJECTION]: '0x9999999999999999999999999999999999999999',
+      [ATTACK_TYPES.FAKE_TRUST_CLAIM]: '0x8888888888888888888888888888888888888888'
+    };
+
+    const defaultAmounts = {
+      [ATTACK_TYPES.URGENT_PRETEXT]: '500000000000000000',
+      [ATTACK_TYPES.PROMPT_INJECTION]: '1000000000000000000',
+      [ATTACK_TYPES.FAKE_TRUST_CLAIM]: '1000000000000000000'
+    };
+
+    const results = [];
+
+    for (let i = 0; i < sequenceTypes.length; i++) {
+      const attackType = sequenceTypes[i];
+      const attackPayload = generateAttack(attackType, { conversationId });
+
+      const eventId = `0x${(Date.now() + i).toString(16).padStart(64, '0')}`;
+      const event = {
+        id: eventId,
+        sender: attackPayload.sender || 'bad_agent',
+        content: attackPayload.message,
+        counterparty: defaultCounterparties[attackType],
+        amountWei: defaultAmounts[attackType]
+      };
+
+      let defenseResult;
+      try {
+        defenseResult = await runtime.processTurn(event);
+      } catch (err) {
+        defenseResult = {
+          turnId: eventId,
+          attemptId: null,
+          decision: 'BLOCKED',
+          replyText: `Defense evaluation failed: ${err.message}`,
+          charterReasonCode: 0,
+          reasoningHash: null,
+          receiptId: null,
+          txHash: null,
+          error: {
+            code: err.code || 'DEFENSE_ERROR',
+            message: err.message
+          }
+        };
+      }
+
+      results.push({
+        attackType,
+        attack: attackPayload,
+        defense: defenseResult
+      });
+    }
+
+    return sendSuccess(res, {
+      conversationId,
+      attacks: results
+    });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 export default router;

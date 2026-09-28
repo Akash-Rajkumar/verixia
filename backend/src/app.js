@@ -55,7 +55,9 @@ app.use((err, req, res, next) => {
   if (err && err.message === 'Not allowed by CORS') {
     return sendError(res, 403, 'CORS_ERROR', 'CORS request origin not allowed');
   }
-  return sendError(res, 500, 'INTERNAL', 'Internal server error');
+  const status = err.status || 500;
+  const code = err.code || 'INTERNAL';
+  return sendError(res, status, code, err.message || 'Internal server error', err.details || {});
 });
 
 export default app;

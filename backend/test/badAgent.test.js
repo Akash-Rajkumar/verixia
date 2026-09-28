@@ -132,12 +132,16 @@ test('9: No fake Good Agent result is returned', async () => {
   assert.equal(body.data.receiptId, undefined);
 });
 
-test('10: POST /api/v1/demo/run-attack-sequence remains 501 NOT_IMPLEMENTED', async () => {
+test('10: POST /api/v1/demo/run-attack-sequence runs full sequence', async () => {
   const res = await fetch(`${baseUrl}/api/v1/demo/run-attack-sequence`, {
-    method: 'POST'
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ conversationId: 'seq_123' })
   });
-  assert.equal(res.status, 501);
+  assert.equal(res.status, 200);
   const body = await res.json();
-  assert.equal(body.ok, false);
-  assert.equal(body.error.code, 'NOT_IMPLEMENTED');
+  assert.equal(body.ok, true);
+  assert.equal(body.data.conversationId, 'seq_123');
+  assert.ok(Array.isArray(body.data.attacks));
+  assert.equal(body.data.attacks.length, 3);
 });
