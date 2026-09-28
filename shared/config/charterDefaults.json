@@ -1,0 +1,6 @@
+{
+  "maxPerTx": "0.5",
+  "dailyCap": "1.5",
+  "humanApprovalThreshold": "0.3",
+  "allowListEnabled": true
+}
