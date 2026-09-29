@@ -71,7 +71,12 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
 
       setConfig(cfg)
       setAgents(agtList)
-      setMessages(msgList)
+      setMessages((prev) => {
+        if (msgList.length === 0) return prev
+        const existingIds = new Set(prev.map((m) => m.id))
+        const newMsgs = msgList.filter((m) => !existingIds.has(m.id))
+        return [...prev, ...newMsgs]
+      })
       setTransactions((prev) => {
         if (txRes.items.length === 0) return prev
         const existingIds = new Set(prev.map((t) => t.id))
@@ -136,10 +141,10 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
     }
     const formattedAmount = formatNativeAmount(heroAttempt.amountWei, 18, "MST")
     if (heroAttempt.status === "blocked") {
-      const humanReason = heroAttempt.blockReasonCode !== null
+      const humanReason = (heroAttempt.blockReasonCode !== null && heroAttempt.blockReasonCode !== undefined && heroAttempt.blockReasonCode !== 0)
         ? REASON_CODE_HUMAN_TEXT[heroAttempt.blockReasonCode] || heroAttempt.blockReason
-        : "Policy boundary enforced"
-      return `Adversarial transfer request of ${formattedAmount} BLOCKED by Spending Charter — ${humanReason}.`
+        : "Safety policy enforced (model provider or fail-closed boundary)"
+      return `Adversarial transfer request of ${formattedAmount} BLOCKED — ${humanReason}.`
     }
     if (heroAttempt.status === "executed") {
       return `Payment of ${formattedAmount} EXECUTED ON-CHAIN after satisfying Spending Charter rules.`
@@ -201,6 +206,23 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
     setIsProcessingAction(true)
     try {
       const res = await api.runAttackSequence({ conversationId: "conv-demo-01" })
+      
+      // Preserve all returned attack and defense message pairs
+      const newMessages: Message[] = []
+      res.runs.forEach((r) => {
+        if (r.attackMessage) newMessages.push(r.attackMessage)
+        if (r.reply) newMessages.push(r.reply)
+      })
+
+      if (newMessages.length > 0) {
+        setMessages((prev) => {
+          const existingIds = new Set(prev.map((m) => m.id))
+          const fresh = newMessages.filter((m) => !existingIds.has(m.id))
+          return [...prev, ...fresh]
+        })
+      }
+
+      // Preserve all returned transaction attempts
       const newAttempts = res.runs
         .map((r) => r.attempt)
         .filter((a): a is TransactionAttempt => a !== null)
@@ -230,6 +252,19 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
         conversationId: "conv-demo-01",
         attackType,
       })
+
+      const newMessages: Message[] = []
+      if (res.attackMessage) newMessages.push(res.attackMessage)
+      if (res.reply) newMessages.push(res.reply)
+
+      if (newMessages.length > 0) {
+        setMessages((prev) => {
+          const existingIds = new Set(prev.map((m) => m.id))
+          const fresh = newMessages.filter((m) => !existingIds.has(m.id))
+          return [...prev, ...fresh]
+        })
+      }
+
       if (res.attempt) {
         setTransactions((prev) => {
           if (prev.some((t) => t.id === res.attempt!.id)) return prev
@@ -254,6 +289,19 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
         amountWei: "1500000000000000000", // 1.5 MST
         description: "Requesting payment of 1.5 MST for verified batch inference compute job #8841.",
       })
+
+      const newMessages: Message[] = []
+      if (res.incomingMessage) newMessages.push(res.incomingMessage)
+      if (res.reply) newMessages.push(res.reply)
+
+      if (newMessages.length > 0) {
+        setMessages((prev) => {
+          const existingIds = new Set(prev.map((m) => m.id))
+          const fresh = newMessages.filter((m) => !existingIds.has(m.id))
+          return [...prev, ...fresh]
+        })
+      }
+
       if (res.attempt) {
         setTransactions((prev) => {
           if (prev.some((t) => t.id === res.attempt!.id)) return prev

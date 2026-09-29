@@ -367,12 +367,14 @@ export const LiveArena: React.FC<LiveArenaProps> = ({
                         </div>
                         <div>
                           <span className="text-xs font-extrabold font-mono text-[#dfff00] uppercase tracking-wider block">
-                            BLOCKED BY SPENDING CHARTER
+                            {heroEvent.attempt.blockReasonCode !== null && heroEvent.attempt.blockReasonCode !== undefined && heroEvent.attempt.blockReasonCode !== 0
+                              ? "BLOCKED BY SPENDING CHARTER"
+                              : "BLOCKED (FAIL-CLOSED SAFETY)"}
                           </span>
                           <span className="text-[10px] font-mono text-white/70 block mt-0.5">
                             {heroEvent.attempt.blockReasonCode !== null && heroEvent.attempt.blockReasonCode !== undefined && heroEvent.attempt.blockReasonCode !== 0
                               ? REASON_CODE_LABELS[heroEvent.attempt.blockReasonCode] || `CODE_${heroEvent.attempt.blockReasonCode}`
-                              : "EXCEEDS_MAX_PER_TX"}
+                              : "MODEL / PROVIDER BOUNDARY"}
                           </span>
                         </div>
                       </>
