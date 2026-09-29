@@ -275,6 +275,10 @@ export class ApiClient {
           txHash: string | null
           amountWei?: string
           counterparty?: string
+          error?: {
+            code: string
+            message: string
+          } | null
           modelUsed?: {
             provider: "gemini" | "ollama"
             name: string
@@ -303,9 +307,11 @@ export class ApiClient {
         : "declined"
 
       const rawReason = item.defense?.charterReasonCode
-      const reasonCode = (rawReason !== undefined && rawReason !== null && rawReason !== 0)
-        ? rawReason
-        : (isBlocked ? 1 : 0)
+      const reasonCode = (rawReason !== undefined && rawReason !== null) ? rawReason : 0
+
+      const errObj = item.defense?.error
+      const errorCode = errObj?.code || null
+      const errorMessage = errObj?.message || null
 
       const attempt: TransactionAttempt | null = item.defense
         ? {
@@ -316,7 +322,7 @@ export class ApiClient {
             counterpartyAddress: item.defense.counterparty || "0x9999999999999999999999999999999999999999",
             amountWei: item.defense.amountWei || "500000000000000000",
             status: attemptStatus,
-            blockReasonCode: isBlocked ? reasonCode : null,
+            blockReasonCode: isBlocked && reasonCode > 0 ? reasonCode : (isBlocked ? 0 : null),
             blockReason: item.defense.replyText || null,
             txHash: item.defense.txHash || null,
             chainId: 91562037,
@@ -328,6 +334,8 @@ export class ApiClient {
               ok: !isBlocked,
               reasonCode: reasonCode,
             },
+            errorCode,
+            errorMessage,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             receipt: item.defense.reasoningHash

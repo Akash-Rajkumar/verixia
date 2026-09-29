@@ -70,6 +70,9 @@ export interface TransactionAttempt {
     reasonCode: number
   }
 
+  errorCode?: string | null
+  errorMessage?: string | null
+
   createdAt: string
   updatedAt: string
 

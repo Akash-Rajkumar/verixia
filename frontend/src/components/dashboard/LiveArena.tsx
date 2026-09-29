@@ -367,14 +367,14 @@ export const LiveArena: React.FC<LiveArenaProps> = ({
                         </div>
                         <div>
                           <span className="text-xs font-extrabold font-mono text-[#dfff00] uppercase tracking-wider block">
-                            {heroEvent.attempt.blockReasonCode !== null && heroEvent.attempt.blockReasonCode !== undefined && heroEvent.attempt.blockReasonCode !== 0
+                            {(heroEvent.attempt.blockReasonCode ?? 0) > 0 && heroEvent.attempt.errorCode !== "ALL_PROVIDERS_FAILED"
                               ? "BLOCKED BY SPENDING CHARTER"
-                              : "BLOCKED (FAIL-CLOSED SAFETY)"}
+                              : "BLOCKED — FAIL-CLOSED SAFETY"}
                           </span>
                           <span className="text-[10px] font-mono text-white/70 block mt-0.5">
-                            {heroEvent.attempt.blockReasonCode !== null && heroEvent.attempt.blockReasonCode !== undefined && heroEvent.attempt.blockReasonCode !== 0
-                              ? REASON_CODE_LABELS[heroEvent.attempt.blockReasonCode] || `CODE_${heroEvent.attempt.blockReasonCode}`
-                              : "MODEL / PROVIDER BOUNDARY"}
+                            {(heroEvent.attempt.blockReasonCode ?? 0) > 0 && heroEvent.attempt.errorCode !== "ALL_PROVIDERS_FAILED"
+                              ? `REASON #${heroEvent.attempt.blockReasonCode}: ${REASON_CODE_LABELS[heroEvent.attempt.blockReasonCode!] || "CHARTER_POLICY"}`
+                              : "MODEL PROVIDER BOUNDARY (CHARTER NOT REACHED)"}
                           </span>
                         </div>
                       </>
@@ -406,7 +406,7 @@ export const LiveArena: React.FC<LiveArenaProps> = ({
                             DECLINED BY AGENT
                           </span>
                           <span className="text-[10px] font-mono text-white/60 block mt-0.5">
-                            Reasoner rejected proposal
+                            CHARTER NOT REACHED (DECLINED BY SENTINEL)
                           </span>
                         </div>
                       </>
@@ -418,8 +418,13 @@ export const LiveArena: React.FC<LiveArenaProps> = ({
                           <Lock className="w-7 h-7 text-white/40" />
                         </div>
                         <span className="text-xs font-bold font-mono text-white/60 uppercase">
-                          EVALUATING ON-CHAIN...
+                          {heroEvent.goodMessage ? "CHARTER NOT REACHED" : "EVALUATING ON-CHAIN..."}
                         </span>
+                        {heroEvent.goodMessage && (
+                          <span className="text-[10px] font-mono text-white/50 block">
+                            Sentinel evaluation completed
+                          </span>
+                        )}
                       </>
                     )}
                   </div>
@@ -452,8 +457,10 @@ export const LiveArena: React.FC<LiveArenaProps> = ({
               historicalPairs.map((pair) => {
                 if (pair.isSystem) return null
 
-                const isBlocked = pair.attempt?.status === "blocked"
+                const isCharterBlocked = pair.attempt?.status === "blocked" && (pair.attempt?.blockReasonCode ?? 0) > 0 && pair.attempt?.errorCode !== "ALL_PROVIDERS_FAILED"
+                const isSafetyBlocked = pair.attempt?.status === "blocked" && ((pair.attempt?.blockReasonCode ?? 0) === 0 || pair.attempt?.errorCode === "ALL_PROVIDERS_FAILED")
                 const isExecuted = pair.attempt?.status === "executed"
+                const isDeclined = pair.attempt?.status === "declined" || (!pair.attempt && pair.goodMessage)
 
                 return (
                   <div
@@ -472,9 +479,14 @@ export const LiveArena: React.FC<LiveArenaProps> = ({
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      {isBlocked && (
+                      {isCharterBlocked && (
                         <Badge variant="red" className="text-[9px] py-0 px-1.5">
                           BLOCKED BY CHARTER
+                        </Badge>
+                      )}
+                      {isSafetyBlocked && (
+                        <Badge variant="cyan" className="text-[9px] py-0 px-1.5">
+                          BLOCKED (SAFETY)
                         </Badge>
                       )}
                       {isExecuted && (
@@ -482,7 +494,12 @@ export const LiveArena: React.FC<LiveArenaProps> = ({
                           EXECUTED ON-CHAIN
                         </Badge>
                       )}
-                      {!isBlocked && !isExecuted && (
+                      {isDeclined && (
+                        <Badge variant="neutral" className="text-[9px] py-0 px-1.5">
+                          DECLINED BY AGENT
+                        </Badge>
+                      )}
+                      {!isCharterBlocked && !isSafetyBlocked && !isExecuted && !isDeclined && (
                         <Badge variant="neutral" className="text-[9px] py-0 px-1.5">
                           {pair.attempt?.status.toUpperCase() || "EVENT"}
                         </Badge>
