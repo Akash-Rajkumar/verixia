@@ -14,18 +14,20 @@ import { Badge } from "@/components/ui/badge"
 import { formatNativeAmount, truncateAddress } from "@/lib/format"
 import { REASON_CODE_LABELS, REASON_CODE_HUMAN_TEXT } from "@/api/constants"
 import { api } from "@/api"
-import type { CharterRules, CharterStatus, TransactionAttempt } from "@/api/types"
+import type { CharterRules, CharterStatus, PublicConfig, TransactionAttempt } from "@/api/types"
 
 export interface CharterPanelProps {
   rules: CharterRules | null
   status: CharterStatus | null
   selectedAttempt?: TransactionAttempt | null
+  config?: PublicConfig | null
 }
 
 export const CharterPanel: React.FC<CharterPanelProps> = ({
   rules,
   status,
   selectedAttempt,
+  config,
 }) => {
   const [counterparties, setCounterparties] = useState<
     { address: string; name: string; status: "allowed" | "denied" }[]
@@ -251,7 +253,13 @@ export const CharterPanel: React.FC<CharterPanelProps> = ({
               <FileCode2 className="w-3.5 h-3.5 text-[#dfff00]" /> Contract:
             </span>
             <span className="text-[#dfff00]">
-              {truncateAddress(rules?.contractAddress, 8, 6)}
+              {truncateAddress(
+                rules?.contractAddress && rules.contractAddress !== "0x0000000000000000000000000000000000000000"
+                  ? rules.contractAddress
+                  : config?.contracts?.SpendingCharter,
+                8,
+                6
+              )}
             </span>
           </div>
         </div>

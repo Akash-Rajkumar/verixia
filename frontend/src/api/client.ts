@@ -26,6 +26,30 @@ export class ApiError extends Error {
   }
 }
 
+function mstToWeiString(val: string | number | undefined | null): string {
+  if (val === undefined || val === null) return "0"
+  const str = String(val).trim()
+  if (!str || str === "0") return "0"
+
+  if (/^\d{10,}$/.test(str)) {
+    return str
+  }
+
+  const parts = str.split(".")
+  const integerPart = parts[0] || "0"
+  let fractionalPart = parts[1] || ""
+
+  if (fractionalPart.length > 18) {
+    fractionalPart = fractionalPart.slice(0, 18)
+  } else {
+    fractionalPart = fractionalPart.padEnd(18, "0")
+  }
+
+  const combined = (integerPart === "0" ? "" : integerPart) + fractionalPart
+  const trimmed = combined.replace(/^0+/, "")
+  return trimmed || "0"
+}
+
 export class ApiClient {
   private baseUrl: string
 
@@ -84,7 +108,21 @@ export class ApiClient {
 
   // CONFIG / HEALTH
   async getPublicConfig(): Promise<PublicConfig> {
-    return this.request<PublicConfig>("/config/public")
+    const raw = await this.request<any>("/config/public")
+    return {
+      chainId: Number(raw.mstChainId || raw.chainId || 91562037),
+      mstChainId: raw.mstChainId || raw.chainId || "91562037",
+      explorerUrl: raw.mstExplorerUrl || raw.explorerUrl || "https://testnet.mstblockchain.com",
+      mstExplorerUrl: raw.mstExplorerUrl || raw.explorerUrl || "https://testnet.mstblockchain.com",
+      contracts: {
+        SpendingCharter: raw.charterAddress || (raw.contracts && raw.contracts.SpendingCharter) || "0xbD4c07Adb44e8ff2030faBcf0c4543067bA95E69",
+        ReputationRegistry: raw.registryAddress || (raw.contracts && raw.contracts.ReputationRegistry) || "0xcE3bfbfC140AdD1a6A7eD1b1Aa571d0314f3Fb95",
+        ReasoningReceipts: raw.receiptsAddress || (raw.contracts && raw.contracts.ReasoningReceipts) || "0x9acDE9ACf72aE5AEc94430B357ce0531C0FFaae1",
+      },
+      modelProvider: raw.modelProvider || "gemini",
+      features: raw.features || { reputation: false, stakeSlash: false, tiered: false },
+      constants: raw.constants || { reasonCodes: {} }
+    }
   }
 
   async getHealth(): Promise<{ status: string; timestamp: string }> {
@@ -112,11 +150,63 @@ export class ApiClient {
 
   // CHARTER
   async getCharterRules(): Promise<CharterRules> {
-    return this.request<CharterRules>("/charter/rules")
+    try {
+      const raw = await this.request<any>("/charter/rules")
+      let contractAddress = raw.contractAddress || raw.charterAddress || ""
+      if (!contractAddress) {
+        try {
+          const cfg = await this.getPublicConfig()
+          contractAddress = cfg.contracts.SpendingCharter
+        } catch (e) {}
+      }
+
+      return {
+        maxPerTxWei: mstToWeiString(raw.maxPerTxWei || raw.maxPerTx),
+        dailyCapWei: mstToWeiString(raw.dailyCapWei || raw.dailyCap),
+        humanApprovalThresholdWei: mstToWeiString(raw.humanApprovalThresholdWei || raw.humanApprovalThreshold),
+        allowListEnabled: Boolean(raw.allowListEnabled),
+        contractAddress: contractAddress || "0xbD4c07Adb44e8ff2030faBcf0c4543067bA95E69"
+      }
+    } catch (err) {
+      if (
+        err instanceof ApiError &&
+        (err.code === "NOT_IMPLEMENTED" || err.message.includes("not implemented"))
+      ) {
+        return {
+          maxPerTxWei: "0",
+          dailyCapWei: "0",
+          humanApprovalThresholdWei: "0",
+          allowListEnabled: false,
+          contractAddress: "0x0000000000000000000000000000000000000000"
+        }
+      }
+      throw err
+    }
   }
 
   async getCharterStatus(): Promise<CharterStatus> {
-    return this.request<CharterStatus>("/charter/status")
+    try {
+      const raw = await this.request<any>("/charter/status")
+      return {
+        windowStart: String(raw.windowStart || "0"),
+        spentInWindowWei: mstToWeiString(raw.spentInWindowWei || raw.spentInWindow),
+        remainingInWindowWei: mstToWeiString(raw.remainingInWindowWei || raw.remainingInWindow),
+        balanceWei: mstToWeiString(raw.balanceWei || raw.balance)
+      }
+    } catch (err) {
+      if (
+        err instanceof ApiError &&
+        (err.code === "NOT_IMPLEMENTED" || err.message.includes("not implemented"))
+      ) {
+        return {
+          windowStart: "0",
+          spentInWindowWei: "0",
+          remainingInWindowWei: "0",
+          balanceWei: "0"
+        }
+      }
+      throw err
+    }
   }
 
   async checkCharter(payload: {

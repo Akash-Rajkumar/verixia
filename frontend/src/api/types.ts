@@ -201,6 +201,26 @@ export interface CharterStatus {
   balanceWei: string
 }
 
+export interface BackendTurnResult {
+  turnId: string
+  attemptId: string | null
+  decision: "BLOCKED" | "EXECUTED" | "DECLINED_BY_AGENT" | "DECLINED"
+  replyText: string
+  charterReasonCode: number
+  reasoningHash: string | null
+  receiptId: string | null
+  txHash: string | null
+  error?: {
+    code: string
+    message: string
+  } | null
+  modelUsed?: {
+    provider: "gemini" | "ollama"
+    name: string
+    fellBack: boolean
+  }
+}
+
 export interface AgentTurnResult {
   incomingMessage: Message
   reply: Message
