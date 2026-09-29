@@ -313,11 +313,16 @@ export class ApiClient {
       const errorCode = errObj?.code || null
       const errorMessage = errObj?.message || null
 
+      const timestamp = Date.now()
+      const attackMsgId = `msg-atk-${timestamp}-${idx}`
+      const replyMsgId = `msg-def-${timestamp}-${idx}`
+      const attemptId = item.defense?.attemptId || item.defense?.turnId || `att-${timestamp}-${idx}`
+
       const attempt: TransactionAttempt | null = item.defense
         ? {
-            id: item.defense.attemptId || item.defense.turnId || `att-${idx}`,
+            id: attemptId,
             conversationId: rawData.conversationId || payload.conversationId || "conv-demo-01",
-            triggerMessageId: item.attack?.id || `msg-atk-${idx}`,
+            triggerMessageId: attackMsgId,
             agentId: "good_agent",
             counterpartyAddress: item.defense.counterparty || "0x9999999999999999999999999999999999999999",
             amountWei: item.defense.amountWei || "500000000000000000",
@@ -340,9 +345,9 @@ export class ApiClient {
             updatedAt: new Date().toISOString(),
             receipt: item.defense.reasoningHash
               ? {
-                  id: item.defense.receiptId || `rcpt-${idx}`,
-                  attemptId: item.defense.attemptId || `att-${idx}`,
-                  receiptId: item.defense.receiptId || `rcpt-${idx}`,
+                  id: item.defense.receiptId || `rcpt-${timestamp}-${idx}`,
+                  attemptId: attemptId,
+                  receiptId: item.defense.receiptId || `rcpt-${timestamp}-${idx}`,
                   reasoningHash: item.defense.reasoningHash,
                   reasoningSummary: item.defense.replyText || "",
                   reasoningFull: null as any,
@@ -362,12 +367,12 @@ export class ApiClient {
 
       return {
         attackRun: {
-          id: `run-${idx}`,
+          id: `run-${timestamp}-${idx}`,
           attackType: item.attackType,
           outcome,
         },
         attackMessage: {
-          id: item.attack?.id || `msg-atk-${idx}`,
+          id: attackMsgId,
           conversationId: rawData.conversationId || payload.conversationId || "conv-demo-01",
           senderAgentId: item.attack?.sender || "bad_agent",
           recipientAgentId: "good_agent",
@@ -377,7 +382,7 @@ export class ApiClient {
           createdAt: new Date().toISOString(),
         },
         reply: {
-          id: item.defense?.turnId || `msg-def-${idx}`,
+          id: replyMsgId,
           conversationId: rawData.conversationId || payload.conversationId || "conv-demo-01",
           senderAgentId: "good_agent",
           recipientAgentId: item.attack?.sender || "bad_agent",

@@ -49,6 +49,7 @@ export const LiveArena: React.FC<LiveArenaProps> = ({
   const isBadAgentMessage = (msg: Message): boolean => {
     return (
       msg.senderAgentId === "agent-bad-01" ||
+      msg.senderAgentId === "bad_agent" ||
       msg.messageType === "attack" ||
       msg.attackType !== null
     )
@@ -327,8 +328,9 @@ export const LiveArena: React.FC<LiveArenaProps> = ({
                   <div className="md:col-span-7 space-y-2">
                     {heroEvent.badMessage ? (
                       <div className="space-y-1.5">
-                        <span className="text-[10px] font-mono text-[#dfff00] font-bold uppercase tracking-wider block">
-                          ADVERSARIAL PROMPT INJECTION INPUT
+                        <span className="text-[10px] font-mono text-[#dfff00] font-bold uppercase tracking-wider block flex items-center gap-1.5">
+                          <ShieldAlert className="w-3.5 h-3.5 text-[#dfff00]" />
+                          BAD AGENT ATTACK INPUT — {heroEvent.badMessage.attackType ? (ATTACK_TYPE_HUMAN_LABELS[heroEvent.badMessage.attackType] || heroEvent.badMessage.attackType.toUpperCase()) : "ADVERSARIAL PROMPT"}
                         </span>
                         <div className="p-4 rounded-xl bg-black border border-[#dfff00]/50 shadow-[0_0_15px_rgba(223,255,0,0.12)] text-xs font-sans text-white leading-relaxed">
                           "{heroEvent.badMessage.content}"
@@ -343,7 +345,17 @@ export const LiveArena: React.FC<LiveArenaProps> = ({
                           "{heroEvent.goodMessage.content}"
                         </div>
                       </div>
-                    ) : null}
+                    ) : (
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] font-mono text-[#dfff00] font-bold uppercase tracking-wider block flex items-center gap-1.5">
+                          <ShieldAlert className="w-3.5 h-3.5 text-[#dfff00]" />
+                          BAD AGENT ATTACK INPUT — ADVERSARIAL PROMPT
+                        </span>
+                        <div className="p-4 rounded-xl bg-black border border-[#dfff00]/50 shadow-[0_0_15px_rgba(223,255,0,0.12)] text-xs font-sans text-white/80 leading-relaxed italic">
+                          "Adversarial prompt injection attempt submitted to Sentinel."
+                        </div>
+                      </div>
+                    )}
 
                     {/* Good Agent Evaluation Response if paired */}
                     {heroEvent.goodMessage && (
