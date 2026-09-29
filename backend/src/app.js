@@ -15,6 +15,8 @@ import eventsRouter from './routes/events.js';
 import adminRouter from './routes/admin.js';
 import juryRouter from './routes/jury.js';
 
+import blockchainRouter from './routes/blockchain.js';
+
 const app = express();
 
 const frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
@@ -45,6 +47,7 @@ app.use('/api/v1', reputationRouter);
 app.use('/api/v1', eventsRouter);
 app.use('/api/v1', adminRouter);
 app.use('/api/v1', juryRouter);
+app.use('/api/v1', blockchainRouter);
 
 // 404 Handler for unknown routes
 app.use((req, res) => {

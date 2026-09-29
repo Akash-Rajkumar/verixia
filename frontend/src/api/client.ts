@@ -3,6 +3,7 @@ import type {
   AgentTurnResult,
   ApiResponse,
   AttackResult,
+  BlockchainTransactionDetails,
   CharterRules,
   CharterStatus,
   Conversation,
@@ -690,6 +691,11 @@ export class ApiClient {
       method: "POST",
       body: JSON.stringify(payload),
     })
+  }
+
+  // BLOCKCHAIN
+  async getBlockchainTransaction(txHash: string): Promise<BlockchainTransactionDetails> {
+    return this.request<BlockchainTransactionDetails>(`/blockchain/transaction/${txHash}`)
   }
 }
 

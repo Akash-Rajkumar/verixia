@@ -324,3 +324,49 @@ export interface JuryEvaluationResult {
     receipts: JuryReceiptRecord[]
   }
 }
+
+export interface BlockchainTransactionDetails {
+  hash: string
+  status: "SUCCESS" | "FAILED" | "PENDING"
+  method: string
+  blockNumber: number | null
+  blockHash: string | null
+  timestamp: number | null
+  from: string
+  to: string | null
+  valueWei: string
+  transactionFeeWei: string
+  gasPriceWei: string
+  gasUsed: string
+  gasLimit: string
+  nonce: number
+  confirmations: number
+  contractAddress: string | null
+  tokenTransfers: Array<{
+    type: "native" | "erc20"
+    asset?: string
+    tokenAddress?: string
+    from: string
+    to: string
+    amountWei: string
+  }>
+  contractEvents: Array<{
+    eventName: string
+    args: {
+      receiptId?: string
+      agent?: string
+      counterparty?: string
+      amountWei?: string
+      decision?: number
+      reasoningHash?: string
+      summary?: string
+      [key: string]: unknown
+    }
+  }>
+  rawLogs?: Array<{
+    address: string
+    topics: string[]
+    data: string
+    index: number
+  }>
+}
