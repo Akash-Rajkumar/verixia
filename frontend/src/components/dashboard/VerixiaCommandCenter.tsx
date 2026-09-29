@@ -12,6 +12,9 @@ import {
   Info,
   Radio,
   Zap,
+  Sparkles,
+  Scale,
+  FileCheck2,
 } from "lucide-react"
 import { TopBar } from "./TopBar"
 import { LiveArena } from "./LiveArena"
@@ -49,6 +52,9 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
   // Single source of truth for selected transaction attempt
   const [selectedAttempt, setSelectedAttempt] = useState<TransactionAttempt | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false)
+
+  // Navigation tab state
+  const [activeTab, setActiveTab] = useState<"overview" | "arena" | "jury" | "audit">("overview")
 
   // Presentation Mode & Fullscreen state
   const [isPresentationMode, setIsPresentationMode] = useState<boolean>(false)
@@ -472,206 +478,386 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
                 transition={{ duration: 0.3 }}
                 className="space-y-8"
               >
-                {/* LEVEL 1 (HERO): LIVE ARENA SPLIT STAGE */}
-                <section className="w-full space-y-3">
-                  <div className="flex items-center justify-between font-mono text-xs text-white/60">
-                    <span className="flex items-center gap-2 font-bold uppercase text-white">
-                      <Zap className="w-4 h-4 text-[#dfff00]" />
-                      PRIMARY DEMO STAGE • LIVE ARENA
-                    </span>
-                    <span className="text-[11px] text-white/40">
-                      BAD AGENT (LEFT) vs VERIXIA SENTINEL (RIGHT)
-                    </span>
+                {/* SECTION NAVIGATION PILL BAR */}
+                <div className="flex items-center justify-center border-b border-white/10 pb-4 mb-2">
+                  <div className="flex items-center gap-1.5 p-1 bg-[#0a0a0a] border border-white/12 rounded-2xl shadow-xl">
+                    <button
+                      onClick={() => setActiveTab("overview")}
+                      className={`px-5 py-2 rounded-xl font-mono text-xs font-bold transition-all duration-200 flex items-center gap-2 ${
+                        activeTab === "overview"
+                          ? "bg-white text-black shadow-lg"
+                          : "text-white/60 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      OVERVIEW
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("arena")}
+                      className={`px-5 py-2 rounded-xl font-mono text-xs font-bold transition-all duration-200 flex items-center gap-2 ${
+                        activeTab === "arena"
+                          ? "bg-[#dfff00] text-black shadow-lg"
+                          : "text-white/60 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      <Zap className="w-3.5 h-3.5" />
+                      LIVE ARENA
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("jury")}
+                      className={`px-5 py-2 rounded-xl font-mono text-xs font-bold transition-all duration-200 flex items-center gap-2 ${
+                        activeTab === "jury"
+                          ? "bg-white text-black shadow-lg"
+                          : "text-white/60 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      <Scale className="w-3.5 h-3.5" />
+                      AI JURY
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("audit")}
+                      className={`px-5 py-2 rounded-xl font-mono text-xs font-bold transition-all duration-200 flex items-center gap-2 ${
+                        activeTab === "audit"
+                          ? "bg-white text-black shadow-lg"
+                          : "text-white/60 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      <FileCheck2 className="w-3.5 h-3.5" />
+                      AUDIT & RECEIPTS
+                    </button>
                   </div>
+                </div>
 
-                  <LiveArena
-                    goodAgent={goodAgent}
-                    badAgent={badAgent}
-                    messages={messages}
-                    transactions={transactions}
-                  />
-                </section>
+                {/* TAB 1: OVERVIEW HERO */}
+                {activeTab === "overview" && (
+                  <motion.div
+                    key="tab-overview"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.25 }}
+                    className="space-y-8"
+                  >
+                    <div className="text-center py-8 px-4 max-w-4xl mx-auto space-y-3">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-mono text-[#dfff00] uppercase tracking-wider">
+                        <ShieldCheck className="w-3.5 h-3.5 text-[#dfff00]" />
+                        VERIXIA AUTONOMOUS GUARDIAN
+                      </div>
+                      <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white font-sans">
+                        Autonomous Agents That Can Defend Their Decisions
+                      </h1>
+                      <p className="text-sm sm:text-base text-white/60 max-w-2xl mx-auto font-sans leading-relaxed">
+                        Deterministic spending charter boundaries, multi-agent adversarial defense, and cryptographic reasoning proofs on-chain.
+                      </p>
+                    </div>
 
-                {/* LEVEL 1 (HERO CTA): ADVERSARIAL ARENA CONTROLS */}
-                <section className="w-full">
-                  <DemoControls
-                    onRunSequence={handleRunSequence}
-                    onRunAttack={handleRunAttack}
-                    onLegitimateOffer={handleLegitimateOffer}
-                    isProcessing={isProcessingAction}
-                  />
-                </section>
-
-                {/* AI JURY PROTOCOL PANEL (FEATURE 1 EXTENSION) */}
-                <section className="w-full">
-                  <JuryPanel />
-                </section>
-
-                {/* CURRENT SECURITY DECISION & WHY? SUMMARY BOX */}
-                {heroAttempt && (
-                  <section className="w-full">
-                    <Card className="bg-[#050505] border-white/20 p-5 md:p-6 rounded-2xl shadow-2xl space-y-4 relative overflow-hidden">
-                      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(223,255,0,0.04)_0%,transparent_60%)] pointer-events-none" />
-                      
-                      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-white/12 pb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-black border border-[#dfff00] flex items-center justify-center text-[#dfff00] shadow-[0_0_18px_rgba(223,255,0,0.25)]">
-                            {heroAttempt.status === "blocked" && <ShieldAlert className="w-6 h-6 text-[#dfff00] animate-pulse" />}
-                            {heroAttempt.status === "executed" && <CheckCircle2 className="w-6 h-6 text-white" />}
-                            {heroAttempt.status === "declined" && <ArrowRight className="w-6 h-6 text-white/80" />}
+                    {/* 4 System State Cards Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <Card className="p-5 bg-[#050505] border-white/12 rounded-2xl flex flex-col justify-between hover:border-white/30 transition-all">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider">GOOD AGENT</span>
+                            <span className="w-2 h-2 rounded-full bg-[#dfff00] animate-pulse" />
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
-                                CURRENT SECURITY DECISION SUMMARY
-                              </span>
-                              <Badge variant="cyan" className="text-[9px] py-0 px-1.5">
-                                ATTEMPT #{heroAttempt.id}
-                              </Badge>
-                            </div>
-                            <p className="text-xs text-white/60 font-sans mt-0.5">
-                              {new Date(heroAttempt.createdAt).toLocaleTimeString()} • {formatNativeAmount(heroAttempt.amountWei, 18, "MST")} REQUESTED
-                            </p>
-                          </div>
+                          <h3 className="text-sm font-bold font-mono text-white">CONNECTED / READY</h3>
+                          <p className="text-xs text-white/60 font-sans">Sentinel reasoning engine monitoring Spending Charter limits and reputation signals.</p>
                         </div>
+                      </Card>
 
-                        {/* Large Status Result Pill */}
-                        <div>
-                          {heroAttempt.status === "blocked" && (
-                            <div className="px-4 py-2 bg-black border border-[#dfff00] rounded-xl text-center shadow-[0_0_20px_rgba(223,255,0,0.2)]">
-                              <span className="text-xs font-extrabold font-mono text-[#dfff00] uppercase tracking-wider block">
-                                🛡 BLOCKED BY SPENDING CHARTER
-                              </span>
-                              <span className="text-[10px] font-mono text-white/70 block">
-                                {heroAttempt.blockReasonCode !== null && heroAttempt.blockReasonCode !== undefined && heroAttempt.blockReasonCode !== 0
-                                  ? REASON_CODE_LABELS[heroAttempt.blockReasonCode] || `CODE_${heroAttempt.blockReasonCode}`
-                                  : "EXCEEDS_MAX_PER_TX"}
-                              </span>
-                            </div>
-                          )}
-                          {heroAttempt.status === "executed" && (
-                            <div className="px-4 py-2 bg-black border border-white/40 rounded-xl text-center shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                              <span className="text-xs font-extrabold font-mono text-white uppercase tracking-wider block">
-                                ✓ EXECUTED ON-CHAIN
-                              </span>
-                              <span className="text-[10px] font-mono text-white/60 block">
-                                All policy checks satisfied
-                              </span>
-                            </div>
-                          )}
-                          {heroAttempt.status === "declined" && (
-                            <div className="px-4 py-2 bg-black border border-white/20 rounded-xl text-center">
-                              <span className="text-xs font-extrabold font-mono text-white/80 uppercase tracking-wider block">
-                                → DECLINED BY AGENT
-                              </span>
-                              <span className="text-[10px] font-mono text-white/50 block">
-                                Rejected during reasoning
-                              </span>
-                            </div>
-                          )}
+                      <Card className="p-5 bg-[#050505] border-white/12 rounded-2xl flex flex-col justify-between hover:border-white/30 transition-all">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider">BAD AGENT</span>
+                            <span className="w-2 h-2 rounded-full bg-[#dfff00] animate-pulse" />
+                          </div>
+                          <h3 className="text-sm font-bold font-mono text-white">READY / ATTACK CAPABLE</h3>
+                          <p className="text-xs text-white/60 font-sans">Adversarial agent equipped with urgent pretexting, prompt injection, and trust payloads.</p>
                         </div>
+                      </Card>
+
+                      <Card className="p-5 bg-[#050505] border-white/12 rounded-2xl flex flex-col justify-between hover:border-white/30 transition-all">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider">AI JURY</span>
+                            <span className="w-2 h-2 rounded-full bg-[#dfff00] animate-pulse" />
+                          </div>
+                          <h3 className="text-sm font-bold font-mono text-white">3 EVALUATORS READY</h3>
+                          <p className="text-xs text-white/60 font-sans">Skeptical, Risk-Averse, and Pragmatic AI jurors providing majority consensus adjudications.</p>
+                        </div>
+                      </Card>
+
+                      <Card className="p-5 bg-[#050505] border-white/12 rounded-2xl flex flex-col justify-between hover:border-white/30 transition-all">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider">REASONING</span>
+                            <span className="w-2 h-2 rounded-full bg-[#dfff00] animate-pulse" />
+                          </div>
+                          <h3 className="text-sm font-bold font-mono text-white">ON-CHAIN PROOFS ACTIVE</h3>
+                          <p className="text-xs text-white/60 font-sans">Cryptographic reasoning hashes written directly to ReasoningReceipts smart contract.</p>
+                        </div>
+                      </Card>
+                    </div>
+
+                    {/* Quick Stage Shortcuts Banner */}
+                    <div className="p-6 bg-[#050505] border border-white/12 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="space-y-1 text-center sm:text-left">
+                        <h3 className="text-sm font-bold font-mono text-white uppercase">Experience Verixia In Action</h3>
+                        <p className="text-xs text-white/60 font-sans">Run a full adversarial attack sequence or trigger the 3-juror AI deliberation protocol.</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Button
+                          variant="primary"
+                          size="md"
+                          onClick={() => setActiveTab("arena")}
+                          className="font-mono text-xs font-bold gap-2 bg-[#dfff00] text-black hover:bg-white"
+                        >
+                          <Zap className="w-4 h-4" />
+                          ENTER LIVE ARENA
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="md"
+                          onClick={() => setActiveTab("jury")}
+                          className="font-mono text-xs gap-2 border-white/20 text-white"
+                        >
+                          <Scale className="w-4 h-4 text-[#dfff00]" />
+                          LAUNCH AI JURY
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* TAB 2: LIVE ARENA */}
+                {(activeTab === "arena" || activeTab === "overview") && (
+                  <motion.div
+                    key="tab-arena"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-8"
+                  >
+                    {/* LEVEL 1 (HERO): LIVE ARENA SPLIT STAGE */}
+                    <section className="w-full space-y-3">
+                      <div className="flex items-center justify-between font-mono text-xs text-white/60">
+                        <span className="flex items-center gap-2 font-bold uppercase text-white">
+                          <Zap className="w-4 h-4 text-[#dfff00]" />
+                          AGENT DEFENSE ARENA
+                        </span>
+                        <span className="text-[11px] text-white/40">
+                          BAD AGENT (LEFT) vs VERIXIA SENTINEL (RIGHT)
+                        </span>
                       </div>
 
-                      {/* Human Explanation & "WHY?" Box */}
-                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center font-mono">
-                        <div className="md:col-span-4 p-3.5 bg-black border border-white/12 rounded-xl">
-                          <span className="text-[10px] text-[#dfff00] font-bold uppercase tracking-wider block mb-1">
-                            WHY WAS THIS DECISION MADE?
-                          </span>
-                          <p className="text-xs font-sans text-white/90 leading-relaxed">
-                            {heroAttempt.status === "blocked"
-                              ? (heroAttempt.blockReasonCode !== null && heroAttempt.blockReasonCode !== undefined && heroAttempt.blockReasonCode !== 0
-                                  ? REASON_CODE_HUMAN_TEXT[heroAttempt.blockReasonCode] || heroAttempt.blockReason
-                                  : "Per-transaction spending limit exceeded.")
-                              : heroAttempt.status === "executed"
-                              ? "Requested amount is within the maximum per-transaction limit and daily spending cap."
-                              : "Sentinel agent reasoning engine declined the transaction proposal."}
-                          </p>
-                        </div>
+                      <LiveArena
+                        goodAgent={goodAgent}
+                        badAgent={badAgent}
+                        messages={messages}
+                        transactions={transactions}
+                      />
+                    </section>
 
-                        <div className="md:col-span-8 p-3.5 bg-black border border-white/12 rounded-xl flex items-center justify-between gap-4">
-                          <div className="space-y-1">
-                            <span className="text-[10px] text-white/50 uppercase tracking-wider block">
-                              ATTEMPT DETAILS
-                            </span>
-                            <div className="text-xs text-white font-mono flex items-center gap-3 flex-wrap">
-                              <span>Amount: <strong className="text-[#dfff00]">{formatNativeAmount(heroAttempt.amountWei, 18, "MST")}</strong></span>
-                              <span>Target: <strong className="text-white">{heroAttempt.counterpartyAddress ? truncateAddress(heroAttempt.counterpartyAddress, 6, 4) : "0x90F7...B906"}</strong></span>
-                              {heroAttempt.attackType && (
-                                <span>Attack: <strong className="text-[#dfff00]">{ATTACK_TYPE_HUMAN_LABELS[heroAttempt.attackType] || heroAttempt.attackType}</strong></span>
+                    {/* DEMO CONTROLS */}
+                    <section className="w-full">
+                      <DemoControls
+                        onRunSequence={handleRunSequence}
+                        onRunAttack={handleRunAttack}
+                        onLegitimateOffer={handleLegitimateOffer}
+                        isProcessing={isProcessingAction}
+                      />
+                    </section>
+
+                    {/* CURRENT SECURITY DECISION & WHY? SUMMARY BOX */}
+                    {heroAttempt && (
+                      <section className="w-full">
+                        <Card className="bg-[#050505] border-white/20 p-5 md:p-6 rounded-2xl shadow-2xl space-y-4 relative overflow-hidden">
+                          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(223,255,0,0.04)_0%,transparent_60%)] pointer-events-none" />
+
+                          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-white/12 pb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-black border border-[#dfff00] flex items-center justify-center text-[#dfff00] shadow-[0_0_18px_rgba(223,255,0,0.25)]">
+                                {heroAttempt.status === "blocked" && <ShieldAlert className="w-6 h-6 text-[#dfff00] animate-pulse" />}
+                                {heroAttempt.status === "executed" && <CheckCircle2 className="w-6 h-6 text-white" />}
+                                {heroAttempt.status === "declined" && <ArrowRight className="w-6 h-6 text-white/80" />}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                                    CURRENT SECURITY DECISION SUMMARY
+                                  </span>
+                                  <Badge variant="cyan" className="text-[9px] py-0 px-1.5">
+                                    ATTEMPT #{heroAttempt.id}
+                                  </Badge>
+                                </div>
+                                <p className="text-xs text-white/60 font-sans mt-0.5">
+                                  {new Date(heroAttempt.createdAt).toLocaleTimeString()} • {formatNativeAmount(heroAttempt.amountWei, 18, "MST")} REQUESTED
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Large Status Result Pill */}
+                            <div>
+                              {heroAttempt.status === "blocked" && (
+                                <div className="px-4 py-2 bg-black border border-[#dfff00] rounded-xl text-center shadow-[0_0_20px_rgba(223,255,0,0.2)]">
+                                  <span className="text-xs font-extrabold font-mono text-[#dfff00] uppercase tracking-wider block">
+                                    🛡 BLOCKED BY SPENDING CHARTER
+                                  </span>
+                                  <span className="text-[10px] font-mono text-white/70 block">
+                                    {heroAttempt.blockReasonCode !== null && heroAttempt.blockReasonCode !== undefined && heroAttempt.blockReasonCode !== 0
+                                      ? REASON_CODE_LABELS[heroAttempt.blockReasonCode] || `CODE_${heroAttempt.blockReasonCode}`
+                                      : "EXCEEDS_MAX_PER_TX"}
+                                  </span>
+                                </div>
+                              )}
+                              {heroAttempt.status === "executed" && (
+                                <div className="px-4 py-2 bg-black border border-white/40 rounded-xl text-center shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                                  <span className="text-xs font-extrabold font-mono text-white uppercase tracking-wider block">
+                                    ✓ EXECUTED ON-CHAIN
+                                  </span>
+                                  <span className="text-[10px] font-mono text-white/60 block">
+                                    All policy checks satisfied
+                                  </span>
+                                </div>
+                              )}
+                              {heroAttempt.status === "declined" && (
+                                <div className="px-4 py-2 bg-black border border-white/20 rounded-xl text-center">
+                                  <span className="text-xs font-extrabold font-mono text-white/80 uppercase tracking-wider block">
+                                    → DECLINED BY AGENT
+                                  </span>
+                                  <span className="text-[10px] font-mono text-white/50 block">
+                                    Rejected during reasoning
+                                  </span>
+                                </div>
                               )}
                             </div>
                           </div>
 
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => handleSelectAttempt(heroAttempt)}
-                            className="text-xs font-mono shrink-0 border-white/20 hover:border-[#dfff00]"
-                          >
-                            Inspect Details
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  </section>
+                          {/* Human Explanation & "WHY?" Box */}
+                          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center font-mono">
+                            <div className="md:col-span-4 p-3.5 bg-black border border-white/12 rounded-xl">
+                              <span className="text-[10px] text-[#dfff00] font-bold uppercase tracking-wider block mb-1">
+                                WHY WAS THIS DECISION MADE?
+                              </span>
+                              <p className="text-xs font-sans text-white/90 leading-relaxed">
+                                {heroAttempt.status === "blocked"
+                                  ? (heroAttempt.blockReasonCode !== null && heroAttempt.blockReasonCode !== undefined && heroAttempt.blockReasonCode !== 0
+                                      ? REASON_CODE_HUMAN_TEXT[heroAttempt.blockReasonCode] || heroAttempt.blockReason
+                                      : "Per-transaction spending limit exceeded.")
+                                  : heroAttempt.status === "executed"
+                                  ? "Requested amount is within the maximum per-transaction limit and daily spending cap."
+                                  : "Sentinel agent reasoning engine declined the transaction proposal."}
+                              </p>
+                            </div>
+
+                            <div className="md:col-span-8 p-3.5 bg-black border border-white/12 rounded-xl flex items-center justify-between gap-4">
+                              <div className="space-y-1">
+                                <span className="text-[10px] text-white/50 uppercase tracking-wider block">
+                                  ATTEMPT DETAILS
+                                </span>
+                                <div className="text-xs text-white font-mono flex items-center gap-3 flex-wrap">
+                                  <span>Amount: <strong className="text-[#dfff00]">{formatNativeAmount(heroAttempt.amountWei, 18, "MST")}</strong></span>
+                                  <span>Target: <strong className="text-white">{heroAttempt.counterpartyAddress ? truncateAddress(heroAttempt.counterpartyAddress, 6, 4) : "0x90F7...B906"}</strong></span>
+                                  {heroAttempt.attackType && (
+                                    <span>Attack: <strong className="text-[#dfff00]">{ATTACK_TYPE_HUMAN_LABELS[heroAttempt.attackType] || heroAttempt.attackType}</strong></span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => handleSelectAttempt(heroAttempt)}
+                                className="text-xs font-mono shrink-0 border-white/20 hover:border-[#dfff00]"
+                              >
+                                Inspect Details
+                              </Button>
+                            </div>
+                          </div>
+                        </Card>
+                      </section>
+                    )}
+                  </motion.div>
                 )}
 
-                {/* LEVEL 2 (SUPPORTING): TRANSACTION LEDGER & SPENDING CHARTER */}
-                <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
-                  {/* Transaction Ledger */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between font-mono text-xs text-white/60">
-                      <span className="font-bold uppercase text-white flex items-center gap-1.5">
-                        <Info className="w-3.5 h-3.5 text-[#dfff00]" /> TRANSACTION LEDGER
-                      </span>
-                      <span>Real-time Audit Trail</span>
-                    </div>
-                    <TransactionLedger
-                      transactions={transactions}
-                      selectedAttemptId={selectedAttempt?.id}
-                      onSelectAttempt={handleSelectAttempt}
-                      isLoading={false}
-                      error={null}
-                      onRetry={loadData}
-                    />
-                  </div>
+                {/* TAB 3: AI JURY */}
+                {(activeTab === "jury" || activeTab === "overview") && (
+                  <motion.section
+                    key="tab-jury"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="w-full"
+                  >
+                    <JuryPanel />
+                  </motion.section>
+                )}
 
-                  {/* Spending Charter Panel */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between font-mono text-xs text-white/60">
-                      <span className="font-bold uppercase text-white flex items-center gap-1.5">
-                        <Lock className="w-3.5 h-3.5 text-[#dfff00]" /> SPENDING CHARTER ENFORCEMENT
-                      </span>
-                      <span>On-Chain Limits</span>
-                    </div>
-                    <CharterPanel
-                      rules={charterRules}
-                      status={charterStatus}
-                      selectedAttempt={selectedAttempt}
-                    />
-                  </div>
-                </section>
+                {/* TAB 4: AUDIT & RECEIPTS */}
+                {(activeTab === "audit" || activeTab === "overview") && (
+                  <motion.div
+                    key="tab-audit"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-8"
+                  >
+                    {/* LEVEL 2 (SUPPORTING): TRANSACTION LEDGER & SPENDING CHARTER */}
+                    <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
+                      {/* Transaction Ledger */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between font-mono text-xs text-white/60">
+                          <span className="font-bold uppercase text-white flex items-center gap-1.5">
+                            <Info className="w-3.5 h-3.5 text-[#dfff00]" /> TRANSACTION LEDGER
+                          </span>
+                          <span>Real-time Audit Trail</span>
+                        </div>
+                        <TransactionLedger
+                          transactions={transactions}
+                          selectedAttemptId={selectedAttempt?.id}
+                          onSelectAttempt={handleSelectAttempt}
+                          isLoading={false}
+                          error={null}
+                          onRetry={loadData}
+                        />
+                      </div>
 
-                {/* LEVEL 3 (PROOF & DEEP DETAIL): REPUTATION & REASONING RECEIPTS */}
-                <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
-                  {/* Reputation Panel */}
-                  <ReputationPanel
-                    config={config}
-                    selectedAttempt={selectedAttempt}
-                  />
+                      {/* Spending Charter Panel */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between font-mono text-xs text-white/60">
+                          <span className="font-bold uppercase text-white flex items-center gap-1.5">
+                            <Lock className="w-3.5 h-3.5 text-[#dfff00]" /> SPENDING CHARTER ENFORCEMENT
+                          </span>
+                          <span>On-Chain Limits</span>
+                        </div>
+                        <CharterPanel
+                          rules={charterRules}
+                          status={charterStatus}
+                          selectedAttempt={selectedAttempt}
+                        />
+                      </div>
+                    </section>
 
-                  {/* Reasoning Receipt Viewer */}
-                  <ReasoningReceiptViewer
-                    config={config}
-                    selectedAttempt={selectedAttempt}
-                  />
-                </section>
+                    {/* LEVEL 3 (PROOF & DEEP DETAIL): REPUTATION & REASONING RECEIPTS */}
+                    <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
+                      {/* Reputation Panel */}
+                      <ReputationPanel
+                        config={config}
+                        selectedAttempt={selectedAttempt}
+                      />
 
-                {/* EXPLAINER STRIP */}
-                <section className="w-full">
-                  <ExplainerStrip selectedAttempt={selectedAttempt} />
-                </section>
+                      {/* Reasoning Receipt Viewer */}
+                      <ReasoningReceiptViewer
+                        config={config}
+                        selectedAttempt={selectedAttempt}
+                      />
+                    </section>
+
+                    {/* EXPLAINER STRIP */}
+                    <section className="w-full">
+                      <ExplainerStrip selectedAttempt={selectedAttempt} />
+                    </section>
+                  </motion.div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

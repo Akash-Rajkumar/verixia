@@ -32,13 +32,37 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
 }) => {
   const [copiedHash, setCopiedHash] = useState(false)
   const [verifying, setVerifying] = useState(false)
+  const [fetchedReceipt, setFetchedReceipt] = useState<ReasoningReceipt | null>(null)
+  const [fetchingReceipt, setFetchingReceipt] = useState<boolean>(false)
   const [verificationResult, setVerificationResult] = useState<{
     verified: boolean
     computedHash: string
     onChainHash: string
   } | null>(null)
 
-  const receipt: ReasoningReceipt | null = selectedAttempt?.receipt || null
+  // Direct receipt from selected attempt or dynamically fetched receipt
+  const receipt: ReasoningReceipt | null = selectedAttempt?.receipt || fetchedReceipt || null
+
+  // Automatically fetch receipt if selectedAttempt has receiptId but no embedded receipt object
+  React.useEffect(() => {
+    setFetchedReceipt(null)
+
+    const receiptId = selectedAttempt?.receiptId
+    if (!selectedAttempt?.receipt && receiptId && receiptId !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
+      setFetchingReceipt(true)
+      api
+        .getReceipt(receiptId)
+        .then((rcpt) => {
+          setFetchedReceipt(rcpt)
+        })
+        .catch(() => {
+          // If fetch fails or no receipt on chain, receipt state remains null
+        })
+        .finally(() => {
+          setFetchingReceipt(false)
+        })
+    }
+  }, [selectedAttempt?.id, selectedAttempt?.receiptId, selectedAttempt?.receipt])
 
   const handleCopyHash = async (hash: string) => {
     try {
@@ -50,13 +74,12 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
     }
   }
 
-  // Verification simulation check calling API abstraction
+  // Verification check calling API abstraction
   const handleVerify = async () => {
     if (!receipt) return
     setVerifying(true)
     setVerificationResult(null)
     try {
-      // Small simulated latency for verification progress animation
       await new Promise((resolve) => setTimeout(resolve, 800))
       const res = await api.verifyReceipt(receipt.receiptId)
       setVerificationResult({
@@ -84,28 +107,48 @@ export const ReasoningReceiptViewer: React.FC<ReasoningReceiptViewerProps> = ({
   // 1. NO TRANSACTION SELECTED STATE
   if (!selectedAttempt) {
     return (
-      <Card className="w-full bg-black border-white/15 shadow-2xl p-6 flex flex-col items-center justify-center text-center h-[520px] rounded-2xl">
+      <Card className="w-full bg-[#050505] border-white/10 shadow-2xl p-8 flex flex-col items-center justify-center text-center h-[520px] rounded-2xl">
         <FileCheck2 className="w-12 h-12 text-[#dfff00] animate-pulse mb-3" />
         <h3 className="text-sm font-bold font-mono text-white uppercase tracking-wider">
           SELECT A TRANSACTION IN THE LEDGER
         </h3>
-        <p className="text-xs text-white/60 max-w-sm mt-1">
-          Click any transaction row in the ledger above to inspect its cryptographic reasoning receipt and on-chain verification proof.
+        <p className="text-xs text-white/50 max-w-sm mt-2 leading-relaxed">
+          Click any transaction row in the ledger to inspect its cryptographic reasoning receipt and on-chain verification proof.
         </p>
       </Card>
     )
   }
 
-  // 2. RECEIPT NULL STATE
+  // 2. RECEIPT FETCHING STATE
+  if (fetchingReceipt) {
+    return (
+      <Card className="w-full bg-[#050505] border-white/10 shadow-2xl p-8 flex flex-col items-center justify-center text-center h-[520px] rounded-2xl">
+        <Cpu className="w-10 h-10 text-[#dfff00] animate-spin mb-3" />
+        <h3 className="text-sm font-bold font-mono text-white uppercase tracking-wider">
+          FETCHING ON-CHAIN RECEIPT...
+        </h3>
+        <p className="text-xs text-white/50 max-w-sm mt-1 font-mono">
+          Querying ReasoningReceipts contract for ID {selectedAttempt.receiptId}...
+        </p>
+      </Card>
+    )
+  }
+
+  // 3. RECEIPT NULL / UNATTACHED STATE
   if (!receipt) {
     return (
-      <Card className="w-full bg-black border-white/15 shadow-2xl p-6 flex flex-col items-center justify-center text-center h-[520px] rounded-2xl">
-        <AlertTriangle className="w-12 h-12 text-white/60 mb-3" />
+      <Card className="w-full bg-[#050505] border-white/10 shadow-2xl p-8 flex flex-col items-center justify-center text-center h-[520px] rounded-2xl">
+        <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-3">
+          <AlertTriangle className="w-6 h-6 text-white/40" />
+        </div>
         <h3 className="text-sm font-bold font-mono text-white uppercase tracking-wider">
-          REASONING RECEIPT NOT AVAILABLE YET
+          NO ON-CHAIN RECEIPT
         </h3>
-        <p className="text-xs text-white/60 max-w-sm mt-1">
-          No on-chain reasoning receipt was attached to transaction attempt <span className="font-mono text-[#dfff00]">{selectedAttempt.id}</span>.
+        <p className="text-xs text-white/50 max-w-sm mt-2 leading-relaxed font-sans">
+          This transaction attempt does not have an on-chain reasoning receipt attached.
+        </p>
+        <p className="text-[11px] font-mono text-white/30 mt-3">
+          Attempt ID: {selectedAttempt.id} • Status: {selectedAttempt.status.toUpperCase()}
         </p>
       </Card>
     )
