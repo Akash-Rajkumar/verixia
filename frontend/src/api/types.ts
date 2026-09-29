@@ -291,3 +291,36 @@ export interface ApiErrorPayload {
 export type ApiResponse<T> =
   | { ok: true; data: T }
   | { ok: false; error: ApiErrorPayload }
+
+export interface JurorVote {
+  persona: "skeptical" | "risk-averse" | "pragmatic" | string
+  vote: "approve" | "reject" | null
+  reasoning: string | null
+  error?: boolean
+  errorMessage?: string
+}
+
+export interface JuryReceiptRecord {
+  persona: string
+  receiptId: string
+  reasoningHash: string
+  decisionCode: number
+  status: "RECORDED" | "FAILED"
+  txHash: string | null
+  error?: string
+}
+
+export interface JuryEvaluationResult {
+  caseId: string
+  caseType: "payment_approval" | "claim_adjudication" | string
+  verdict: "approve" | "reject" | null
+  status: "COMPLETED" | "FAILED"
+  errorCode?: string
+  votes: JurorVote[]
+  persisted?: boolean
+  verdictId?: string
+  receipts?: {
+    receiptsStatus: "ALL_RECORDED" | "PARTIAL_FAILED" | "ALL_FAILED" | "SKIPPED"
+    receipts: JuryReceiptRecord[]
+  }
+}

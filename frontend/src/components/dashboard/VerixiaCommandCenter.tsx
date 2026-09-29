@@ -22,6 +22,7 @@ import { ReputationPanel } from "./ReputationPanel"
 import { ReasoningReceiptViewer } from "./ReasoningReceiptViewer"
 import { ExplainerStrip } from "./ExplainerStrip"
 import { TransactionDetail } from "./TransactionDetail"
+import { JuryPanel } from "./JuryPanel"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -499,6 +500,11 @@ export const VerixiaCommandCenter: React.FC<VerixiaCommandCenterProps> = ({ onBa
                     onLegitimateOffer={handleLegitimateOffer}
                     isProcessing={isProcessingAction}
                   />
+                </section>
+
+                {/* AI JURY PROTOCOL PANEL (FEATURE 1 EXTENSION) */}
+                <section className="w-full">
+                  <JuryPanel />
                 </section>
 
                 {/* CURRENT SECURITY DECISION & WHY? SUMMARY BOX */}

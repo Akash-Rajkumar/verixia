@@ -13,6 +13,7 @@ import receiptsRouter from './routes/receipts.js';
 import reputationRouter from './routes/reputation.js';
 import eventsRouter from './routes/events.js';
 import adminRouter from './routes/admin.js';
+import juryRouter from './routes/jury.js';
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use('/api/v1', receiptsRouter);
 app.use('/api/v1', reputationRouter);
 app.use('/api/v1', eventsRouter);
 app.use('/api/v1', adminRouter);
+app.use('/api/v1', juryRouter);
 
 // 404 Handler for unknown routes
 app.use((req, res) => {

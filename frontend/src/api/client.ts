@@ -679,6 +679,18 @@ export class ApiClient {
       throw err
     }
   }
+  // JURY
+  async evaluateJuryCase(payload: {
+    caseId: string
+    caseType: "payment_approval" | "claim_adjudication"
+    context?: Record<string, unknown>
+    recordReceipts?: boolean
+  }): Promise<import("./types").JuryEvaluationResult> {
+    return this.request<import("./types").JuryEvaluationResult>("/jury/evaluate", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    })
+  }
 }
 
 export const apiClient = new ApiClient()
